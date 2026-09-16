@@ -117,7 +117,8 @@ function TestimonialParticleCanvas({ reduceMotion }: { reduceMotion: boolean | n
       { r: 168, g: 73, b: 36 },   // Terracotta (#A84924)
     ];
 
-    const particleCount = 55;
+    const isMobileDevice = typeof window !== "undefined" && window.innerWidth < 768;
+    const particleCount = isMobileDevice ? 15 : 55;
     const particles = Array.from({ length: particleCount }, () => {
       const color = colors[Math.floor(Math.random() * colors.length)];
       const depth = 0.4 + Math.random() * 0.6;
@@ -295,7 +296,7 @@ export function Testimonials() {
 
       {/* 3. Infinite Right-to-Left (RTL) Continuous Moving Testimonial Carousel */}
       <div
-        className="relative w-full overflow-hidden py-6"
+        className="relative w-full overflow-hidden py-6 [touch-action:pan-y]"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >

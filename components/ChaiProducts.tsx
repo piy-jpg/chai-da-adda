@@ -169,7 +169,7 @@ export function ChaiProducts() {
 
       {/* Infinite Continuous Running Horizontal Track */}
       <div
-        className="relative w-full overflow-hidden py-3"
+        className="relative w-full overflow-hidden py-3 [touch-action:pan-y]"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >

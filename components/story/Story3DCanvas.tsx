@@ -52,10 +52,19 @@ export function Story3DCanvas() {
 
     window.addEventListener("resize", handleResize);
 
-    // 3D Camera & Perspective Parameters
+    let isVisible = true;
+    const isMobileDevice = window.innerWidth < 768;
+    const maxParticles = isMobileDevice ? 18 : 70;
     const fov = 350;
     const particles: Particle3D[] = [];
-    const maxParticles = 80;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(container);
 
     const spiceTypes: Array<{
       type: Particle3D["type"];
@@ -110,135 +119,137 @@ export function Story3DCanvas() {
     let frame = 0;
 
     const render = () => {
-      frame++;
-      // Smooth mouse lerp
-      mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.05;
-      mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.05;
+      if (isVisible) {
+        frame++;
+        // Smooth mouse lerp
+        mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.05;
+        mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.05;
 
-      ctx.clearRect(0, 0, width, height);
+        ctx.clearRect(0, 0, width, height);
 
-      // Center of projection
-      const cx = width / 2;
-      const cy = height / 2;
+        // Center of projection
+        const cx = width / 2;
+        const cy = height / 2;
 
-      // Draw subtle dynamic ambient glow around cursor
-      if (mouseRef.current.isHovered) {
-        const glowRadius = 200;
-        const radGrad = ctx.createRadialGradient(
-          cx + mouseRef.current.x,
-          cy + mouseRef.current.y,
-          0,
-          cx + mouseRef.current.x,
-          cy + mouseRef.current.y,
-          glowRadius
-        );
-        radGrad.addColorStop(0, "rgba(223, 171, 95, 0.08)");
-        radGrad.addColorStop(0.5, "rgba(168, 73, 36, 0.035)");
-        radGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
-        ctx.fillStyle = radGrad;
-        ctx.fillRect(0, 0, width, height);
-      }
-
-      // Sort particles by Z for correct 3D depth rendering (back to front)
-      particles.sort((a, b) => b.z - a.z);
-
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        p.life++;
-
-        // Life cycle alpha fade in & out
-        const progress = p.life / p.maxLife;
-        if (progress < 0.2) {
-          p.alpha = (progress / 0.2) * p.maxAlpha;
-        } else if (progress > 0.7) {
-          p.alpha = (1 - (progress - 0.7) / 0.3) * p.maxAlpha;
-        } else {
-          p.alpha = p.maxAlpha;
-        }
-
-        // 3D physics movement
-        p.x += p.vx + Math.sin(frame * 0.015 + p.z * 0.02) * 0.3;
-        p.y += p.vy;
-        p.z += p.vz;
-        p.rot += p.rotSpeed;
-
-        // Interactive mouse 3D repulsion
+        // Draw subtle dynamic ambient glow around cursor
         if (mouseRef.current.isHovered) {
-          const dx = p.x - mouseRef.current.x;
-          const dy = p.y - mouseRef.current.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 150 && dist > 1) {
-            const force = (1 - dist / 150) * 0.7;
-            p.x += (dx / dist) * force * 1.8;
-            p.y += (dy / dist) * force * 1.8;
-            p.rotSpeed += (Math.random() - 0.5) * 0.02;
+          const glowRadius = 200;
+          const radGrad = ctx.createRadialGradient(
+            cx + mouseRef.current.x,
+            cy + mouseRef.current.y,
+            0,
+            cx + mouseRef.current.x,
+            cy + mouseRef.current.y,
+            glowRadius
+          );
+          radGrad.addColorStop(0, "rgba(223, 171, 95, 0.08)");
+          radGrad.addColorStop(0.5, "rgba(168, 73, 36, 0.035)");
+          radGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+          ctx.fillStyle = radGrad;
+          ctx.fillRect(0, 0, width, height);
+        }
+
+        // Sort particles by Z for correct 3D depth rendering (back to front)
+        particles.sort((a, b) => b.z - a.z);
+
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.life++;
+
+          // Life cycle alpha fade in & out
+          const progress = p.life / p.maxLife;
+          if (progress < 0.2) {
+            p.alpha = (progress / 0.2) * p.maxAlpha;
+          } else if (progress > 0.7) {
+            p.alpha = (1 - (progress - 0.7) / 0.3) * p.maxAlpha;
+          } else {
+            p.alpha = p.maxAlpha;
           }
+
+          // 3D physics movement
+          p.x += p.vx + Math.sin(frame * 0.015 + p.z * 0.02) * 0.3;
+          p.y += p.vy;
+          p.z += p.vz;
+          p.rot += p.rotSpeed;
+
+          // Interactive mouse 3D repulsion
+          if (mouseRef.current.isHovered) {
+            const dx = p.x - mouseRef.current.x;
+            const dy = p.y - mouseRef.current.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 150 && dist > 1) {
+              const force = (1 - dist / 150) * 0.7;
+              p.x += (dx / dist) * force * 1.8;
+              p.y += (dy / dist) * force * 1.8;
+              p.rotSpeed += (Math.random() - 0.5) * 0.02;
+            }
+          }
+
+          // 3D perspective projection
+          const scale = fov / (fov + p.z);
+          if (scale <= 0) continue;
+
+          const projX = cx + p.x * scale;
+          const projY = cy + p.y * scale;
+          const projSize = Math.max(0.5, p.baseSize * scale);
+
+          // Respawn particle if expired or out of bounds
+          if (p.life >= p.maxLife || projY < -50 || projX < -100 || projX > width + 100 || p.z < -250 || p.z > 500) {
+            particles[i] = createParticle();
+            continue;
+          }
+
+          ctx.save();
+          ctx.translate(projX, projY);
+          ctx.rotate(p.rot);
+
+          if (p.type === "steam") {
+            // Soft billowing aromatic steam cloud
+            const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, projSize);
+            grad.addColorStop(0, `rgba(${p.color}, ${p.alpha * 0.75})`);
+            grad.addColorStop(0.5, `rgba(${p.color}, ${p.alpha * 0.3})`);
+            grad.addColorStop(1, `rgba(${p.color}, 0)`);
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(0, 0, projSize, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (p.type === "ember") {
+            // Glowing heat ember with halo
+            const emberGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, projSize * 2.2);
+            emberGrad.addColorStop(0, `rgba(255, 230, 180, ${p.alpha})`);
+            emberGrad.addColorStop(0.35, `rgba(${p.color}, ${p.alpha * 0.75})`);
+            emberGrad.addColorStop(1, `rgba(${p.color}, 0)`);
+            ctx.fillStyle = emberGrad;
+            ctx.beginPath();
+            ctx.arc(0, 0, projSize * 2.2, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (p.type === "saffron") {
+            // Saffron filament thread
+            ctx.strokeStyle = `rgba(${p.color}, ${p.alpha})`;
+            ctx.lineWidth = Math.max(1, 1.6 * scale);
+            ctx.beginPath();
+            ctx.moveTo(-projSize, -projSize * 0.3);
+            ctx.quadraticCurveTo(0, projSize * 0.4, projSize, -projSize * 0.2);
+            ctx.stroke();
+          } else if (p.type === "cardamom") {
+            // Cardamom pod shape
+            ctx.fillStyle = `rgba(${p.color}, ${p.alpha})`;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, projSize * 0.7, projSize * 1.2, p.rot, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = `rgba(80, 100, 50, ${p.alpha * 0.5})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          } else {
+            // Tea leaf flake
+            ctx.fillStyle = `rgba(${p.color}, ${p.alpha})`;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, projSize, projSize * 0.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          ctx.restore();
         }
-
-        // 3D perspective projection
-        const scale = fov / (fov + p.z);
-        if (scale <= 0) continue;
-
-        const projX = cx + p.x * scale;
-        const projY = cy + p.y * scale;
-        const projSize = Math.max(0.5, p.baseSize * scale);
-
-        // Respawn particle if expired or out of bounds
-        if (p.life >= p.maxLife || projY < -50 || projX < -100 || projX > width + 100 || p.z < -250 || p.z > 500) {
-          particles[i] = createParticle();
-          continue;
-        }
-
-        ctx.save();
-        ctx.translate(projX, projY);
-        ctx.rotate(p.rot);
-
-        if (p.type === "steam") {
-          // Soft billowing aromatic steam cloud
-          const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, projSize);
-          grad.addColorStop(0, `rgba(${p.color}, ${p.alpha * 0.75})`);
-          grad.addColorStop(0.5, `rgba(${p.color}, ${p.alpha * 0.3})`);
-          grad.addColorStop(1, `rgba(${p.color}, 0)`);
-          ctx.fillStyle = grad;
-          ctx.beginPath();
-          ctx.arc(0, 0, projSize, 0, Math.PI * 2);
-          ctx.fill();
-        } else if (p.type === "ember") {
-          // Glowing heat ember with halo
-          const emberGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, projSize * 2.2);
-          emberGrad.addColorStop(0, `rgba(255, 230, 180, ${p.alpha})`);
-          emberGrad.addColorStop(0.35, `rgba(${p.color}, ${p.alpha * 0.75})`);
-          emberGrad.addColorStop(1, `rgba(${p.color}, 0)`);
-          ctx.fillStyle = emberGrad;
-          ctx.beginPath();
-          ctx.arc(0, 0, projSize * 2.2, 0, Math.PI * 2);
-          ctx.fill();
-        } else if (p.type === "saffron") {
-          // Saffron filament thread
-          ctx.strokeStyle = `rgba(${p.color}, ${p.alpha})`;
-          ctx.lineWidth = Math.max(1, 1.6 * scale);
-          ctx.beginPath();
-          ctx.moveTo(-projSize, -projSize * 0.3);
-          ctx.quadraticCurveTo(0, projSize * 0.4, projSize, -projSize * 0.2);
-          ctx.stroke();
-        } else if (p.type === "cardamom") {
-          // Cardamom pod shape
-          ctx.fillStyle = `rgba(${p.color}, ${p.alpha})`;
-          ctx.beginPath();
-          ctx.ellipse(0, 0, projSize * 0.7, projSize * 1.2, p.rot, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.strokeStyle = `rgba(80, 100, 50, ${p.alpha * 0.5})`;
-          ctx.lineWidth = 0.8;
-          ctx.stroke();
-        } else {
-          // Tea leaf flake
-          ctx.fillStyle = `rgba(${p.color}, ${p.alpha})`;
-          ctx.beginPath();
-          ctx.ellipse(0, 0, projSize, projSize * 0.5, 0, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        ctx.restore();
       }
 
       animId = requestAnimationFrame(render);
@@ -248,6 +259,7 @@ export function Story3DCanvas() {
 
     return () => {
       cancelAnimationFrame(animId);
+      observer.disconnect();
       window.removeEventListener("resize", handleResize);
     };
   }, []);

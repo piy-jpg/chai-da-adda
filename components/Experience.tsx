@@ -116,8 +116,9 @@ function Experience3DCanvas({ reduceMotion }: { reduceMotion: boolean | null }) 
       rotSpeed: number;
     }
 
+    const isMobileDevice = window.innerWidth < 768;
+    const maxParticles = isMobileDevice ? 16 : 75;
     const particles: Particle3D[] = [];
-    const maxParticles = 75;
 
     const spiceTypes: Array<{
       type: Particle3D["type"];
