@@ -9,18 +9,15 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
-    // Check for touch / mobile device
-    const isTouchDevice =
-      typeof window !== "undefined" &&
-      ("ontouchstart" in window ||
-        navigator.maxTouchPoints > 0 ||
-        window.innerWidth < 768);
+    // Check if device is a mobile phone (< 768px screen)
+    const isMobilePhone = typeof window !== "undefined" && window.innerWidth < 768;
 
-    if (isTouchDevice) {
-      // On mobile, use pure native high-performance touch scrolling
+    if (isMobilePhone) {
+      // On mobile phones, use native momentum scrolling
       return;
     }
 
+    // On laptops / desktops: Activate Lenis luxury smooth scrolling
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -28,6 +25,8 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       gestureOrientation: "vertical",
       smoothWheel: true,
       wheelMultiplier: 1.0,
+      touchMultiplier: 1.0,
+      syncTouch: false,
     });
 
     lenis.on("scroll", ScrollTrigger.update);
