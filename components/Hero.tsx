@@ -304,23 +304,19 @@ export function Hero() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  const [isMobile, setIsMobile] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
-    const isMobileCheck =
-      typeof window !== "undefined" &&
-      (window.innerWidth < 768 ||
-        "ontouchstart" in window ||
-        navigator.maxTouchPoints > 0);
-    setIsMobile(isMobileCheck);
-
     const video = videoRef.current;
     const container = containerRef.current;
     if (!video || !container) return;
+
+    // Ensure video does not autoplay, so scroll drives it frame-by-frame
+    video.pause();
+    video.currentTime = 0;
 
     let triggerInstance: ScrollTrigger | null = null;
     let proxy = { currentTime: 0 };
@@ -333,72 +329,46 @@ export function Hero() {
         triggerInstance.kill();
       }
 
-      if (isMobileCheck) {
-        // On mobile: autoplay background video in ambient loop and drive multi-stage narrative via ScrollTrigger
-        video.muted = true;
-        video.loop = true;
-        video.playsInline = true;
-        video.play().catch(() => {});
-
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: container,
-            start: "top top",
-            end: "+=1600",
-            pin: true,
-            scrub: 0.6,
-            anticipatePin: 1,
-            onUpdate: (self) => {
-              setScrollProgress(self.progress);
-            },
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: container,
+          start: "top top",
+          end: "+=2800",
+          pin: true,
+          scrub: 0.8,
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            setScrollProgress(self.progress);
           },
-        });
+        },
+      });
 
-        triggerInstance = tl.scrollTrigger || null;
-      } else {
-        // On desktop: scrub video currentTime smoothly along with multi-stage narrative
-        video.pause();
-        video.currentTime = 0;
-
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: container,
-            start: "top top",
-            end: "+=2800",
-            pin: true,
-            scrub: 0.8,
-            anticipatePin: 1,
-            onUpdate: (self) => {
-              setScrollProgress(self.progress);
-            },
+      // Scrub the video currentTime smoothly across the scroll duration
+      tl.to(
+        proxy,
+        {
+          currentTime: duration,
+          ease: "none",
+          onUpdate: () => {
+            if (video && !isNaN(proxy.currentTime)) {
+              video.currentTime = proxy.currentTime;
+            }
           },
-        });
+        },
+        0
+      );
 
-        tl.to(
-          proxy,
-          {
-            currentTime: duration,
-            ease: "none",
-            onUpdate: () => {
-              if (video && !isNaN(proxy.currentTime)) {
-                video.currentTime = proxy.currentTime;
-              }
-            },
-          },
-          0
-        );
+      // Subtle scale effect on the video container
+      tl.to(
+        video,
+        {
+          scale: 1.08,
+          ease: "power1.inOut",
+        },
+        0
+      );
 
-        tl.to(
-          video,
-          {
-            scale: 1.08,
-            ease: "power1.inOut",
-          },
-          0
-        );
-
-        triggerInstance = tl.scrollTrigger || null;
-      }
+      triggerInstance = tl.scrollTrigger || null;
     };
 
     if (video.readyState >= 1) {
@@ -423,14 +393,12 @@ export function Hero() {
       id="home"
       className="relative w-full h-screen min-h-[100dvh] overflow-hidden bg-[#0A0604] select-none"
     >
-      {/* Scroll-Scrubbed / Ambient Video Frame */}
+      {/* Scroll-Scrubbed Video Frame */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
         <video
           ref={videoRef}
           muted
           playsInline
-          autoPlay={isMobile}
-          loop={isMobile}
           preload="auto"
           className="w-full h-full object-cover transform-gpu pointer-events-none filter brightness-95"
         >
