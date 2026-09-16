@@ -309,110 +309,119 @@ export function Hero() {
   const [videoDuration, setVideoDuration] = useState(0);
 
   useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
     const isMobileCheck =
-      window.innerWidth < 768 ||
-      "ontouchstart" in window ||
-      navigator.maxTouchPoints > 0;
+      typeof window !== "undefined" &&
+      (window.innerWidth < 768 ||
+        "ontouchstart" in window ||
+        navigator.maxTouchPoints > 0);
     setIsMobile(isMobileCheck);
 
     const video = videoRef.current;
     const container = containerRef.current;
     if (!video || !container) return;
 
-    if (isMobileCheck) {
-      // On mobile, autoplay ambient looping video without pinned scroll trap
-      video.muted = true;
-      video.loop = true;
-      video.playsInline = true;
-      video.play().catch(() => {});
-      return;
-    }
-
-    gsap.registerPlugin(ScrollTrigger);
-
-    // Ensure video does not autoplay on desktop for scroll scrubbing
-    video.pause();
-    video.currentTime = 0;
-
     let triggerInstance: ScrollTrigger | null = null;
     let proxy = { currentTime: 0 };
 
-    const setupScrollScrub = () => {
+    const setupTimeline = () => {
       const duration = video.duration || 10;
       setVideoDuration(duration);
 
-      // Kill previous if exists
       if (triggerInstance) {
         triggerInstance.kill();
       }
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: container,
-          start: "top top",
-          end: "+=3000",
-          pin: true,
-          scrub: 0.8,
-          anticipatePin: 1,
-          onUpdate: (self) => {
-            setScrollProgress(self.progress);
+      if (isMobileCheck) {
+        // On mobile: autoplay background video in ambient loop and drive multi-stage narrative via ScrollTrigger
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.play().catch(() => {});
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: container,
+            start: "top top",
+            end: "+=1600",
+            pin: true,
+            scrub: 0.6,
+            anticipatePin: 1,
+            onUpdate: (self) => {
+              setScrollProgress(self.progress);
+            },
           },
-        },
-      });
+        });
 
-      // Scrub the video currentTime smoothly across the scroll duration
-      tl.to(
-        proxy,
-        {
-          currentTime: duration,
-          ease: "none",
-          onUpdate: () => {
-            if (video && !isNaN(proxy.currentTime)) {
-              video.currentTime = proxy.currentTime;
-            }
+        triggerInstance = tl.scrollTrigger || null;
+      } else {
+        // On desktop: scrub video currentTime smoothly along with multi-stage narrative
+        video.pause();
+        video.currentTime = 0;
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: container,
+            start: "top top",
+            end: "+=2800",
+            pin: true,
+            scrub: 0.8,
+            anticipatePin: 1,
+            onUpdate: (self) => {
+              setScrollProgress(self.progress);
+            },
           },
-        },
-        0
-      );
+        });
 
-      // Subtle scale effect on the video container
-      tl.to(
-        video,
-        {
-          scale: 1.08,
-          ease: "power1.inOut",
-        },
-        0
-      );
+        tl.to(
+          proxy,
+          {
+            currentTime: duration,
+            ease: "none",
+            onUpdate: () => {
+              if (video && !isNaN(proxy.currentTime)) {
+                video.currentTime = proxy.currentTime;
+              }
+            },
+          },
+          0
+        );
 
-      triggerInstance = tl.scrollTrigger || null;
+        tl.to(
+          video,
+          {
+            scale: 1.08,
+            ease: "power1.inOut",
+          },
+          0
+        );
+
+        triggerInstance = tl.scrollTrigger || null;
+      }
     };
 
     if (video.readyState >= 1) {
-      setupScrollScrub();
+      setupTimeline();
     } else {
-      video.addEventListener("loadedmetadata", setupScrollScrub);
-      video.addEventListener("canplay", setupScrollScrub);
+      video.addEventListener("loadedmetadata", setupTimeline);
+      video.addEventListener("canplay", setupTimeline);
     }
 
     return () => {
-      video.removeEventListener("loadedmetadata", setupScrollScrub);
-      video.removeEventListener("canplay", setupScrollScrub);
+      video.removeEventListener("loadedmetadata", setupTimeline);
+      video.removeEventListener("canplay", setupTimeline);
       if (triggerInstance) {
         triggerInstance.kill();
       }
     };
   }, []);
 
-  // Format time (e.g. 0:03 / 0:15)
-  const currentFormattedTime = (scrollProgress * videoDuration).toFixed(1);
-  const totalFormattedTime = videoDuration.toFixed(1);
-
   return (
     <section
       ref={containerRef}
       id="home"
-      className="relative w-full min-h-[100dvh] h-screen overflow-hidden bg-[#0A0604] select-none flex flex-col justify-center"
+      className="relative w-full h-screen min-h-[100dvh] overflow-hidden bg-[#0A0604] select-none"
     >
       {/* Scroll-Scrubbed / Ambient Video Frame */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
@@ -438,161 +447,120 @@ export function Hero() {
       <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#0D0806]/35 to-[#0D0806]/90 pointer-events-none z-10" />
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-[#C69247]/10 blur-[170px] pointer-events-none z-10" />
 
-      {/* Dynamic Narrative Content */}
-      <div className="relative z-20 w-full h-full max-w-5xl mx-auto px-5 sm:px-8 flex flex-col items-center justify-center text-center">
-        {isMobile ? (
-          /* ================= MOBILE VIEW: Direct, Clear, Responsive & Interactive ================= */
-          <div className="flex flex-col items-center justify-center py-20 pointer-events-auto">
-            {/* Brand Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#C69247]/35 bg-[#1E130D]/85 backdrop-blur-md text-[#DFAB5F] text-[11px] font-semibold uppercase tracking-[0.25em] mb-4 shadow-xl">
-              <Sparkles className="w-3.5 h-3.5 text-[#DFAB5F]" />
-              <span>CHAI KA ADDA</span>
-            </div>
-
-            {/* Main Headline */}
-            <h1 className="text-3xl sm:text-5xl font-serif font-normal text-[#FBF6EE] leading-[1.12] tracking-tight mb-4 drop-shadow-2xl">
-              More Than Chai. <br />
-              <span className="text-gold-gradient italic font-normal">
-                It&apos;s An Experience.
-              </span>
-            </h1>
-
-            {/* Description */}
-            <p className="text-sm text-[#D8CCC0] font-sans font-light max-w-md mx-auto leading-relaxed mb-6">
-              Authentic Indian chai, slow-simmered in hand-beaten brass pots and poured fresh into Varanasi kiln kulhads.
-            </p>
-
-            {/* Action CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-xs sm:max-w-none">
-              <a
-                href="#chai"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-[#C69247] hover:bg-[#DFAB5F] text-[#0D0806] font-bold text-xs uppercase tracking-[0.18em] transition-all duration-300 gold-glow shadow-lg"
-              >
-                <span>Explore Our Chai</span>
-                <ArrowUpRight className="w-4 h-4" />
-              </a>
-
-              <a
-                href="#visit"
-                className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 rounded-full border border-[#C69247]/40 bg-[#140C08]/85 hover:bg-[#C69247]/15 hover:border-[#DFAB5F] text-[#FBF6EE] font-medium text-xs uppercase tracking-[0.18em] transition-all duration-300 backdrop-blur-sm shadow-md"
-              >
-                Visit The Adda
-              </a>
-            </div>
+      {/* Dynamic Narrative Stages (Crossfading based on scrollProgress) */}
+      <div className="relative z-20 w-full h-full max-w-5xl mx-auto px-4 sm:px-8 flex flex-col items-center justify-center text-center">
+        {/* ================= STAGE 1: 0% to 32% (Grand Opening) ================= */}
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 transition-all duration-500 pointer-events-auto"
+          style={{
+            opacity: scrollProgress <= 0.32 ? Math.max(0, 1 - scrollProgress * 3.2) : 0,
+            transform: `translateY(${scrollProgress * -35}px)`,
+            pointerEvents: scrollProgress <= 0.3 ? "auto" : "none",
+          }}
+        >
+          {/* Brand Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full border border-[#C69247]/30 bg-[#1E130D]/75 backdrop-blur-md text-[#DFAB5F] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] sm:tracking-[0.3em] mb-4 sm:mb-6 shadow-xl">
+            <Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-[#DFAB5F]" />
+            <span>CHAI KA ADDA</span>
           </div>
-        ) : (
-          /* ================= DESKTOP VIEW: Multi-Stage Interactive Scroll Scrubbing ================= */
-          <>
-            {/* Stage 1 */}
-            <div
-              className="absolute inset-0 flex flex-col items-center justify-center px-6 transition-all duration-700 pointer-events-auto"
-              style={{
-                opacity: scrollProgress <= 0.32 ? Math.max(0, 1 - scrollProgress * 3.2) : 0,
-                transform: `translateY(${scrollProgress * -40}px)`,
-                pointerEvents: scrollProgress <= 0.3 ? "auto" : "none",
-              }}
+
+          {/* Main Headline */}
+          <h1 className="text-3xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-normal text-[#FBF6EE] leading-[1.1] sm:leading-[1.08] tracking-tight mb-4 sm:mb-6 drop-shadow-2xl">
+            More Than Chai. <br />
+            <span className="text-gold-gradient italic font-normal">
+              It&apos;s An Experience.
+            </span>
+          </h1>
+
+          {/* Description */}
+          <p className="text-xs sm:text-xl md:text-2xl text-[#D8CCC0] font-sans font-light max-w-2xl mx-auto leading-relaxed mb-6 sm:mb-8">
+            Authentic Indian chai, crafted with warmth, tradition and a modern soul.
+          </p>
+        </div>
+
+        {/* ================= STAGE 2: 33% to 68% (The Slow Boiling Craft) ================= */}
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 transition-all duration-500"
+          style={{
+            opacity:
+              scrollProgress > 0.28 && scrollProgress < 0.72
+                ? Math.min(1, Math.sin(((scrollProgress - 0.28) / 0.44) * Math.PI) * 1.3)
+                : 0,
+            transform: `translateY(${(scrollProgress - 0.5) * -25}px)`,
+            pointerEvents: scrollProgress > 0.32 && scrollProgress < 0.68 ? "auto" : "none",
+          }}
+        >
+          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full border border-[#C69247]/30 bg-[#1E130D]/75 backdrop-blur-md text-[#DFAB5F] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.22em] sm:tracking-[0.25em] mb-3 sm:mb-5">
+            <Flame className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-[#DFAB5F]" />
+            <span>THE SLOW DUM CRAFT</span>
+          </div>
+
+          <h2 className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#FBF6EE] leading-tight mb-3 sm:mb-5 drop-shadow-2xl">
+            Slow Brass Boiling. <br />
+            <span className="text-gold-gradient italic font-normal">
+              18 Hand-Pounded Spices.
+            </span>
+          </h2>
+
+          <p className="text-xs sm:text-lg md:text-xl text-[#D8CCC0] font-sans font-light max-w-xl mx-auto leading-relaxed mb-5 sm:mb-8">
+            Single-estate Upper Assam leaves simmered with fragrant Idukki cardamom, fiery adrak, and pure mountain water.
+          </p>
+
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+            {["Single-Estate Assam", "Stone-Crushed Spices", "Varanasi Kiln Kulhads"].map((tag, i) => (
+              <span
+                key={i}
+                className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-[#1E130D]/80 border border-[#C69247]/25 text-[10px] sm:text-xs text-[#DFAB5F] font-mono uppercase tracking-wider"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* ================= STAGE 3: 69% to 100% (The Grand Climax & CTAs) ================= */}
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 transition-all duration-500"
+          style={{
+            opacity: scrollProgress >= 0.68 ? Math.min(1, (scrollProgress - 0.68) * 3.5) : 0,
+            transform: `translateY(${(1 - scrollProgress) * 25}px)`,
+            pointerEvents: scrollProgress >= 0.7 ? "auto" : "none",
+          }}
+        >
+          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full border border-[#C69247]/30 bg-[#1E130D]/75 backdrop-blur-md text-[#DFAB5F] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] sm:tracking-[0.3em] mb-3 sm:mb-5">
+            <Coffee className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-[#DFAB5F]" />
+            <span>YOUR CUP IS READY</span>
+          </div>
+
+          <h2 className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#FBF6EE] leading-tight mb-3 sm:mb-5 drop-shadow-2xl">
+            Every Sip Begins <br />
+            <span className="text-gold-gradient italic font-normal">
+              A Timeless Conversation.
+            </span>
+          </h2>
+
+          <p className="text-xs sm:text-xl text-[#D8CCC0] font-sans font-light max-w-xl mx-auto leading-relaxed mb-6 sm:mb-10">
+            Step into the Adda and taste the rich soul of authentic Indian chai culture.
+          </p>
+
+          {/* Action CTAs */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 w-full max-w-xs sm:max-w-none">
+            <a
+              href="#chai"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-[#C69247] hover:bg-[#DFAB5F] text-[#0D0806] font-bold text-xs sm:text-sm uppercase tracking-[0.18em] sm:tracking-[0.2em] transition-all duration-300 hover:scale-105 gold-glow shadow-lg"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#C69247]/30 bg-[#1E130D]/70 backdrop-blur-md text-[#DFAB5F] text-xs font-semibold uppercase tracking-[0.3em] mb-6 shadow-xl">
-                <Sparkles className="w-3.5 h-3.5 text-[#DFAB5F]" />
-                <span>CHAI KA ADDA</span>
-              </div>
+              <span>Explore Our Chai</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </a>
 
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-normal text-[#FBF6EE] leading-[1.08] tracking-tight mb-6 drop-shadow-2xl">
-                More Than Chai. <br />
-                <span className="text-gold-gradient italic font-normal">
-                  It&apos;s An Experience.
-                </span>
-              </h1>
-
-              <p className="text-xl md:text-2xl text-[#D8CCC0] font-sans font-light max-w-2xl mx-auto leading-relaxed mb-8">
-                Authentic Indian chai, crafted with warmth, tradition and a modern soul.
-              </p>
-            </div>
-
-            {/* Stage 2 */}
-            <div
-              className="absolute inset-0 flex flex-col items-center justify-center px-6 transition-all duration-700"
-              style={{
-                opacity:
-                  scrollProgress > 0.28 && scrollProgress < 0.72
-                    ? Math.min(1, Math.sin(((scrollProgress - 0.28) / 0.44) * Math.PI) * 1.3)
-                    : 0,
-                transform: `translateY(${(scrollProgress - 0.5) * -30}px)`,
-                pointerEvents: scrollProgress > 0.32 && scrollProgress < 0.68 ? "auto" : "none",
-              }}
+            <a
+              href="#visit"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 sm:px-8 py-3.5 sm:py-4 rounded-full border border-[#C69247]/40 bg-[#140C08]/80 hover:bg-[#C69247]/15 hover:border-[#DFAB5F] text-[#FBF6EE] font-medium text-xs sm:text-sm uppercase tracking-[0.18em] sm:tracking-[0.2em] transition-all duration-300 hover:scale-105 backdrop-blur-sm shadow-md"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#C69247]/30 bg-[#1E130D]/70 backdrop-blur-md text-[#DFAB5F] text-xs font-semibold uppercase tracking-[0.25em] mb-5">
-                <Flame className="w-3.5 h-3.5 text-[#DFAB5F]" />
-                <span>THE SLOW DUM CRAFT</span>
-              </div>
-
-              <h2 className="text-4xl md:text-6xl lg:text-7xl font-serif text-[#FBF6EE] leading-tight mb-5 drop-shadow-2xl">
-                Slow Brass Boiling. <br />
-                <span className="text-gold-gradient italic font-normal">
-                  18 Hand-Pounded Spices.
-                </span>
-              </h2>
-
-              <p className="text-lg md:text-xl text-[#D8CCC0] font-sans font-light max-w-xl mx-auto leading-relaxed mb-8">
-                Single-estate Upper Assam leaves simmered with fragrant Idukki cardamom, fiery adrak, and pure mountain water.
-              </p>
-
-              <div className="flex flex-wrap justify-center gap-3">
-                {["Single-Estate Assam", "Stone-Crushed Spices", "Varanasi Kiln Kulhads"].map((tag, i) => (
-                  <span
-                    key={i}
-                    className="px-3.5 py-1.5 rounded-full bg-[#1E130D]/80 border border-[#C69247]/25 text-xs text-[#DFAB5F] font-mono uppercase tracking-wider"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Stage 3 */}
-            <div
-              className="absolute inset-0 flex flex-col items-center justify-center px-6 transition-all duration-700"
-              style={{
-                opacity: scrollProgress >= 0.68 ? Math.min(1, (scrollProgress - 0.68) * 3.5) : 0,
-                transform: `translateY(${(1 - scrollProgress) * 30}px)`,
-                pointerEvents: scrollProgress >= 0.7 ? "auto" : "none",
-              }}
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#C69247]/30 bg-[#1E130D]/70 backdrop-blur-md text-[#DFAB5F] text-xs font-semibold uppercase tracking-[0.3em] mb-5">
-                <Coffee className="w-3.5 h-3.5 text-[#DFAB5F]" />
-                <span>YOUR CUP IS READY</span>
-              </div>
-
-              <h2 className="text-4xl md:text-6xl lg:text-7xl font-serif text-[#FBF6EE] leading-tight mb-5 drop-shadow-2xl">
-                Every Sip Begins <br />
-                <span className="text-gold-gradient italic font-normal">
-                  A Timeless Conversation.
-                </span>
-              </h2>
-
-              <p className="text-xl text-[#D8CCC0] font-sans font-light max-w-xl mx-auto leading-relaxed mb-10">
-                Step into the Adda and taste the rich soul of authentic Indian chai culture.
-              </p>
-
-              <div className="flex flex-wrap items-center justify-center gap-6">
-                <a
-                  href="#chai"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-[#C69247] hover:bg-[#DFAB5F] text-[#0D0806] font-bold text-sm uppercase tracking-[0.2em] transition-all duration-300 hover:scale-105 gold-glow"
-                >
-                  <span>Explore Our Chai</span>
-                  <ArrowUpRight className="w-4 h-4" />
-                </a>
-
-                <a
-                  href="#visit"
-                  className="inline-flex items-center justify-center px-8 py-4 rounded-full border border-[#C69247]/40 bg-[#140C08]/80 hover:bg-[#C69247]/15 hover:border-[#DFAB5F] text-[#FBF6EE] font-medium text-sm uppercase tracking-[0.2em] transition-all duration-300 hover:scale-105 backdrop-blur-sm"
-                >
-                  Visit The Adda
-                </a>
-              </div>
-            </div>
-          </>
-        )}
+              Visit The Adda
+            </a>
+          </div>
+        </div>
       </div>
 
       {/* Scroll Down Indicator */}
