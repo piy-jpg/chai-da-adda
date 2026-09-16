@@ -17,7 +17,8 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       gestureOrientation: "vertical",
       smoothWheel: true,
       wheelMultiplier: 1.0,
-      touchMultiplier: 1.2,
+      touchMultiplier: 1.0,
+      syncTouch: false,
     });
 
     lenis.on("scroll", ScrollTrigger.update);

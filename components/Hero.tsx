@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowDown, Sparkles, Coffee, ArrowUpRight, Flame, Leaf, Clock } from "lucide-react";
+import { ArrowDown, Sparkles, Coffee, ArrowUpRight, Flame, Clock } from "lucide-react";
 
 /** Real-time 3D Particle, Spice, Tea-Leaf, & Dotted Atmosphere Canvas for Hero */
 function Hero3DCanvas() {
@@ -304,19 +304,23 @@ export function Hero() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
+  const [isMobile, setIsMobile] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
+    const isMobileDevice =
+      typeof window !== "undefined" &&
+      (window.innerWidth < 768 ||
+        "ontouchstart" in window ||
+        navigator.maxTouchPoints > 0);
+    setIsMobile(isMobileDevice);
+
     const video = videoRef.current;
     const container = containerRef.current;
     if (!video || !container) return;
-
-    // Ensure video does not autoplay, so scroll drives it frame-by-frame
-    video.pause();
-    video.currentTime = 0;
 
     let triggerInstance: ScrollTrigger | null = null;
     let proxy = { currentTime: 0 };
@@ -329,46 +333,83 @@ export function Hero() {
         triggerInstance.kill();
       }
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: container,
-          start: "top top",
-          end: "+=3600",
-          pin: true,
-          scrub: 0.8,
-          anticipatePin: 1,
-          onUpdate: (self) => {
-            setScrollProgress(self.progress);
+      if (isMobileDevice) {
+        // On mobile & mobile preview:
+        // 1. Play background video in smooth ambient loop (eliminates black screen / seek freeze)
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.play().catch(() => {});
+
+        // 2. Drive multi-stage narrative & background scale via ScrollTrigger
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: container,
+            start: "top top",
+            end: "+=1500",
+            pin: true,
+            scrub: 0.6,
+            anticipatePin: 1,
+            onUpdate: (self) => {
+              setScrollProgress(self.progress);
+            },
           },
-        },
-      });
+        });
 
-      // Scrub the video currentTime smoothly across the scroll duration
-      tl.to(
-        proxy,
-        {
-          currentTime: duration,
-          ease: "none",
-          onUpdate: () => {
-            if (video && !isNaN(proxy.currentTime)) {
-              video.currentTime = proxy.currentTime;
-            }
+        tl.to(
+          video,
+          {
+            scale: 1.08,
+            ease: "power1.inOut",
           },
-        },
-        0
-      );
+          0
+        );
 
-      // Subtle scale effect on the video container
-      tl.to(
-        video,
-        {
-          scale: 1.09,
-          ease: "power1.inOut",
-        },
-        0
-      );
+        triggerInstance = tl.scrollTrigger || null;
+      } else {
+        // On desktop/laptop: scrub video frame-by-frame
+        video.pause();
+        video.currentTime = 0;
 
-      triggerInstance = tl.scrollTrigger || null;
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: container,
+            start: "top top",
+            end: "+=2800",
+            pin: true,
+            scrub: 0.8,
+            anticipatePin: 1,
+            onUpdate: (self) => {
+              setScrollProgress(self.progress);
+            },
+          },
+        });
+
+        tl.to(
+          proxy,
+          {
+            currentTime: duration,
+            ease: "none",
+            onUpdate: () => {
+              if (video && !isNaN(proxy.currentTime)) {
+                video.currentTime = proxy.currentTime;
+              }
+            },
+          },
+          0
+        );
+
+        tl.to(
+          video,
+          {
+            scale: 1.08,
+            ease: "power1.inOut",
+          },
+          0
+        );
+
+        triggerInstance = tl.scrollTrigger || null;
+      }
     };
 
     if (video.readyState >= 1) {
@@ -391,14 +432,16 @@ export function Hero() {
     <section
       ref={containerRef}
       id="home"
-      className="relative w-full h-screen min-h-[100dvh] overflow-hidden bg-[#0A0604] select-none"
+      className="relative w-full h-[100dvh] min-h-[100dvh] overflow-hidden bg-[#0A0604] select-none"
     >
-      {/* Scroll-Scrubbed Video Frame */}
+      {/* Background Video Frame */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
         <video
           ref={videoRef}
           muted
           playsInline
+          autoPlay={isMobile}
+          loop={isMobile}
           preload="auto"
           className="w-full h-full object-cover transform-gpu pointer-events-none filter brightness-95"
         >
@@ -415,15 +458,15 @@ export function Hero() {
       <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#0D0806]/35 to-[#0D0806]/90 pointer-events-none z-10" />
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-[#C69247]/10 blur-[170px] pointer-events-none z-10" />
 
-      {/* Dynamic Narrative Stages (Crossfading across 4 stages based on scrollProgress) */}
+      {/* Dynamic Narrative Stages (Crossfading based on scrollProgress) */}
       <div className="relative z-20 w-full h-full max-w-5xl mx-auto px-4 sm:px-8 flex flex-col items-center justify-center text-center">
-        {/* ================= STAGE 1: 0% to 25% (The Brand Awakening) ================= */}
+        {/* ================= STAGE 1: 0% to 32% (Grand Opening) ================= */}
         <div
           className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 transition-all duration-500 pointer-events-auto"
           style={{
-            opacity: scrollProgress <= 0.24 ? Math.max(0, 1 - scrollProgress * 4.2) : 0,
+            opacity: scrollProgress <= 0.32 ? Math.max(0, 1 - scrollProgress * 3.2) : 0,
             transform: `translateY(${scrollProgress * -35}px)`,
-            pointerEvents: scrollProgress <= 0.22 ? "auto" : "none",
+            pointerEvents: scrollProgress <= 0.3 ? "auto" : "none",
           }}
         >
           {/* Brand Badge */}
@@ -446,56 +489,16 @@ export function Hero() {
           </p>
         </div>
 
-        {/* ================= STAGE 2: 25% to 50% (Upper Assam Leaves & Whole Spices) ================= */}
+        {/* ================= STAGE 2: 33% to 68% (The Slow Boiling Craft) ================= */}
         <div
           className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 transition-all duration-500"
           style={{
             opacity:
-              scrollProgress > 0.22 && scrollProgress < 0.52
-                ? Math.min(1, Math.sin(((scrollProgress - 0.22) / 0.3) * Math.PI) * 1.35)
+              scrollProgress > 0.28 && scrollProgress < 0.72
+                ? Math.min(1, Math.sin(((scrollProgress - 0.28) / 0.44) * Math.PI) * 1.3)
                 : 0,
-            transform: `translateY(${(scrollProgress - 0.36) * -25}px)`,
-            pointerEvents: scrollProgress > 0.24 && scrollProgress < 0.48 ? "auto" : "none",
-          }}
-        >
-          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full border border-[#C69247]/30 bg-[#1E130D]/75 backdrop-blur-md text-[#DFAB5F] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.22em] sm:tracking-[0.25em] mb-3 sm:mb-5">
-            <Leaf className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-[#DFAB5F]" />
-            <span>WHOLE LEAF & BOTANICALS</span>
-          </div>
-
-          <h2 className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#FBF6EE] leading-tight mb-3 sm:mb-5 drop-shadow-2xl">
-            Upper Assam Leaves. <br />
-            <span className="text-gold-gradient italic font-normal">
-              18 Hand-Pounded Spices.
-            </span>
-          </h2>
-
-          <p className="text-xs sm:text-lg md:text-xl text-[#D8CCC0] font-sans font-light max-w-xl mx-auto leading-relaxed mb-5 sm:mb-8">
-            Single-estate golden tips infused with fragrant green Idukki cardamom, fiery mountain adrak, and royal saffron.
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
-            {["Single-Estate Assam", "Idukki Cardamom", "Pampore Saffron"].map((tag, i) => (
-              <span
-                key={i}
-                className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-[#1E130D]/80 border border-[#C69247]/25 text-[10px] sm:text-xs text-[#DFAB5F] font-mono uppercase tracking-wider"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* ================= STAGE 3: 50% to 75% (Slow Brass Dum & Kiln Mitti) ================= */}
-        <div
-          className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 transition-all duration-500"
-          style={{
-            opacity:
-              scrollProgress > 0.48 && scrollProgress < 0.78
-                ? Math.min(1, Math.sin(((scrollProgress - 0.48) / 0.3) * Math.PI) * 1.35)
-                : 0,
-            transform: `translateY(${(scrollProgress - 0.62) * -25}px)`,
-            pointerEvents: scrollProgress > 0.5 && scrollProgress < 0.74 ? "auto" : "none",
+            transform: `translateY(${(scrollProgress - 0.5) * -25}px)`,
+            pointerEvents: scrollProgress > 0.32 && scrollProgress < 0.68 ? "auto" : "none",
           }}
         >
           <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full border border-[#C69247]/30 bg-[#1E130D]/75 backdrop-blur-md text-[#DFAB5F] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.22em] sm:tracking-[0.25em] mb-3 sm:mb-5">
@@ -506,16 +509,16 @@ export function Hero() {
           <h2 className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#FBF6EE] leading-tight mb-3 sm:mb-5 drop-shadow-2xl">
             Slow Brass Boiling. <br />
             <span className="text-gold-gradient italic font-normal">
-              Varanasi Kiln Kulhads.
+              18 Hand-Pounded Spices.
             </span>
           </h2>
 
           <p className="text-xs sm:text-lg md:text-xl text-[#D8CCC0] font-sans font-light max-w-xl mx-auto leading-relaxed mb-5 sm:mb-8">
-            Caramelized decoctions rolling on open hearths, served exclusively in unglazed earthen terracotta for authentic petrichor.
+            Single-estate Upper Assam leaves simmered with fragrant Idukki cardamom, fiery adrak, and pure mountain water.
           </p>
 
           <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
-            {["Hand-Beaten Brass", "25-Min Dum", "100% Varanasi Kiln"].map((tag, i) => (
+            {["Single-Estate Assam", "Stone-Crushed Spices", "Varanasi Kiln Kulhads"].map((tag, i) => (
               <span
                 key={i}
                 className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-[#1E130D]/80 border border-[#C69247]/25 text-[10px] sm:text-xs text-[#DFAB5F] font-mono uppercase tracking-wider"
@@ -526,13 +529,13 @@ export function Hero() {
           </div>
         </div>
 
-        {/* ================= STAGE 4: 75% to 100% (The Grand Climax & Action CTAs) ================= */}
+        {/* ================= STAGE 3: 69% to 100% (The Grand Climax & CTAs) ================= */}
         <div
           className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 transition-all duration-500"
           style={{
-            opacity: scrollProgress >= 0.74 ? Math.min(1, (scrollProgress - 0.74) * 4) : 0,
+            opacity: scrollProgress >= 0.68 ? Math.min(1, (scrollProgress - 0.68) * 3.5) : 0,
             transform: `translateY(${(1 - scrollProgress) * 25}px)`,
-            pointerEvents: scrollProgress >= 0.76 ? "auto" : "none",
+            pointerEvents: scrollProgress >= 0.7 ? "auto" : "none",
           }}
         >
           <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full border border-[#C69247]/30 bg-[#1E130D]/75 backdrop-blur-md text-[#DFAB5F] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] sm:tracking-[0.3em] mb-3 sm:mb-5">
@@ -548,7 +551,7 @@ export function Hero() {
           </h2>
 
           <p className="text-xs sm:text-xl text-[#D8CCC0] font-sans font-light max-w-xl mx-auto leading-relaxed mb-6 sm:mb-10">
-            Step into the Adda, pull up a wooden bench, and taste the rich soul of authentic Indian chai culture.
+            Step into the Adda and taste the rich soul of authentic Indian chai culture.
           </p>
 
           {/* Action CTAs */}
