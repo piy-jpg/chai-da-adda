@@ -312,10 +312,7 @@ export function Hero() {
     gsap.registerPlugin(ScrollTrigger);
 
     const isMobileDevice =
-      typeof window !== "undefined" &&
-      (window.innerWidth < 768 ||
-        "ontouchstart" in window ||
-        navigator.maxTouchPoints > 0);
+      typeof window !== "undefined" && window.innerWidth < 768;
     setIsMobile(isMobileDevice);
 
     const video = videoRef.current;
@@ -333,83 +330,51 @@ export function Hero() {
         triggerInstance.kill();
       }
 
-      if (isMobileDevice) {
-        // On mobile & mobile preview:
-        // 1. Play background video in smooth ambient loop (eliminates black screen / seek freeze)
-        video.muted = true;
-        video.loop = true;
-        video.playsInline = true;
-        video.play().catch(() => {});
+      // Ensure video is paused at initial load on all devices
+      video.pause();
+      video.currentTime = 0;
 
-        // 2. Drive multi-stage narrative & background scale via ScrollTrigger
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: container,
-            start: "top top",
-            end: "+=1500",
-            pin: true,
-            scrub: 0.6,
-            anticipatePin: 1,
-            onUpdate: (self) => {
-              setScrollProgress(self.progress);
-            },
+      const scrollDistance = isMobileDevice ? 2000 : 2800;
+
+      // Scrub video frame-by-frame on all devices
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: container,
+          start: "top top",
+          end: `+=${scrollDistance}`,
+          pin: true,
+          scrub: 0.8,
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            setScrollProgress(self.progress);
           },
-        });
+        },
+      });
 
-        tl.to(
-          video,
-          {
-            scale: 1.08,
-            ease: "power1.inOut",
+      tl.to(
+        proxy,
+        {
+          currentTime: duration,
+          ease: "none",
+          onUpdate: () => {
+            if (video && !isNaN(proxy.currentTime)) {
+              video.currentTime = proxy.currentTime;
+            }
           },
-          0
-        );
+        },
+        0
+      );
 
-        triggerInstance = tl.scrollTrigger || null;
-      } else {
-        // On desktop/laptop: scrub video frame-by-frame
-        video.pause();
-        video.currentTime = 0;
+      tl.to(
+        video,
+        {
+          scale: 1.08,
+          ease: "power1.inOut",
+        },
+        0
+      );
 
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: container,
-            start: "top top",
-            end: "+=2800",
-            pin: true,
-            scrub: 0.8,
-            anticipatePin: 1,
-            onUpdate: (self) => {
-              setScrollProgress(self.progress);
-            },
-          },
-        });
-
-        tl.to(
-          proxy,
-          {
-            currentTime: duration,
-            ease: "none",
-            onUpdate: () => {
-              if (video && !isNaN(proxy.currentTime)) {
-                video.currentTime = proxy.currentTime;
-              }
-            },
-          },
-          0
-        );
-
-        tl.to(
-          video,
-          {
-            scale: 1.08,
-            ease: "power1.inOut",
-          },
-          0
-        );
-
-        triggerInstance = tl.scrollTrigger || null;
-      }
+      triggerInstance = tl.scrollTrigger || null;
     };
 
     if (video.readyState >= 1) {
@@ -440,8 +405,6 @@ export function Hero() {
           ref={videoRef}
           muted
           playsInline
-          autoPlay={isMobile}
-          loop={isMobile}
           preload="auto"
           className="w-full h-full object-cover transform-gpu pointer-events-none filter brightness-95"
         >
