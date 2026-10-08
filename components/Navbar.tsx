@@ -172,36 +172,35 @@ export function Navbar() {
               />
             )}
 
-            {/* Brand Logo with Animated Coffee Steam */}
+            {/* Brand Logo with Official Logo Emblem */}
             <Link
               href="/"
-              className="flex items-center gap-3 group cursor-pointer shrink-0 z-10"
+              className="flex items-center gap-2.5 sm:gap-3 group cursor-pointer shrink-0 z-10"
             >
               <div className="relative">
-                {/* Ambient Halo Behind Cup */}
-                <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-[#DFAB5F]/30 to-[#C69247]/10 blur-md opacity-70 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                {/* Ambient Halo Behind Logo */}
+                <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#DFAB5F]/40 to-[#C69247]/20 blur-md opacity-80 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
                 <motion.div
-                  whileHover={shouldReduceMotion ? undefined : { scale: 1.08, rotate: -4 }}
+                  whileHover={shouldReduceMotion ? undefined : { scale: 1.08, rotate: -3 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.3, ease: cinematicEase }}
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#C69247]/50 bg-[#1E130D] flex items-center justify-center text-[#DFAB5F] group-hover:border-[#DFAB5F] group-hover:shadow-[0_0_16px_rgba(223,171,95,0.45)] transition-all duration-300 relative z-10 shadow-inner"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#DFAB5F]/70 bg-[#160D09] p-0.5 shadow-[0_0_15px_rgba(223,171,95,0.35)] group-hover:border-[#DFAB5F] group-hover:shadow-[0_0_20px_rgba(223,171,95,0.6)] transition-all duration-300 relative z-10 overflow-hidden flex items-center justify-center"
                 >
-                  <Coffee className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-[#DFAB5F] transition-transform duration-300 group-hover:scale-110" />
-
-                  {/* Micro Steam Dot */}
-                  <span className="absolute -top-0.5 right-2 w-1.5 h-1.5 rounded-full bg-[#DFAB5F] animate-ping opacity-75" />
+                  <img
+                    src="/logo.png"
+                    alt="Chai Da Adda Official Logo"
+                    className="w-full h-full object-cover rounded-full"
+                  />
                 </motion.div>
               </div>
 
               <div className="flex flex-col select-none">
                 <span className="font-serif text-xs sm:text-[13px] font-bold tracking-[0.22em] text-[#FBF6EE] group-hover:text-[#DFAB5F] transition-colors leading-tight drop-shadow-sm">
-                  CHAI KA ADDA
+                  CHAI DA ADDA
                 </span>
                 <span className="text-[7.5px] sm:text-[8px] font-mono uppercase tracking-[0.32em] text-[#DFAB5F]/85 leading-tight flex items-center gap-1">
-                  <span>Varanasi Heritage</span>
-                  <span className="w-1 h-1 rounded-full bg-[#DFAB5F] inline-block" />
-                  <span>1998</span>
+                  <span>Good Tea • Better Vibes</span>
                 </span>
               </div>
             </Link>

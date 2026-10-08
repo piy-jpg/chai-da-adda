@@ -24,10 +24,15 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "CHAI KA ADDA | More Than Chai. It's An Experience.",
+  title: "CHAI DA ADDA | Good Tea • Better Vibes",
   description:
     "Authentic Indian chai, crafted with warmth, tradition and a modern soul. Fresh ginger, cardamom, single-estate Assam tea, and unglazed Varanasi terracotta kulhads.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
   keywords: [
+    "Chai Da Adda",
     "Chai Ka Adda",
     "Indian Chai Brand",
     "Masala Chai",
@@ -37,14 +42,15 @@ export const metadata: Metadata = {
     "Kulhad Chai",
     "Indian Cafe",
   ],
-  authors: [{ name: "Chai Ka Adda" }],
+  authors: [{ name: "Chai Da Adda" }],
   openGraph: {
-    title: "CHAI KA ADDA | More Than Chai. It's An Experience.",
+    title: "CHAI DA ADDA | Good Tea • Better Vibes",
     description:
       "Authentic Indian chai, crafted with warmth, tradition and a modern soul.",
-    siteName: "Chai Ka Adda",
+    siteName: "Chai Da Adda",
     locale: "en_IN",
     type: "website",
+    images: ["/logo.png"],
   },
 };
 

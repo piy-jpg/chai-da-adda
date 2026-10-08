@@ -186,15 +186,19 @@ export function Footer() {
           {/* Col 1: Brand Identity & Accreditations (4 cols) */}
           <div className="lg:col-span-4 space-y-3.5">
             <Link href="/" className="flex items-center gap-3 group inline-flex">
-              <div className="w-9 h-9 rounded-full border border-[#DFAB5F]/70 bg-[#160D09] flex items-center justify-center text-[#DFAB5F] shadow-[0_0_12px_rgba(223,171,95,0.25)] group-hover:border-[#DFAB5F] group-hover:scale-105 transition-all">
-                <Coffee className="w-4 h-4" />
+              <div className="w-10 h-10 rounded-full border border-[#DFAB5F]/70 bg-[#160D09] p-0.5 shadow-[0_0_12px_rgba(223,171,95,0.25)] group-hover:border-[#DFAB5F] group-hover:scale-105 transition-all overflow-hidden flex items-center justify-center">
+                <img
+                  src="/logo.png"
+                  alt="Chai Da Adda Official Logo"
+                  className="w-full h-full object-cover rounded-full"
+                />
               </div>
               <div className="flex flex-col">
                 <span className="font-serif text-sm font-bold tracking-[0.22em] text-[#FFFFFF] group-hover:text-[#DFAB5F] transition-colors leading-tight">
-                  CHAI KA ADDA
+                  CHAI DA ADDA
                 </span>
                 <span className="text-[7.5px] font-mono uppercase tracking-[0.28em] text-[#DFAB5F]">
-                  Varanasi Heritage • Estd. 1998
+                  Good Tea • Better Vibes • Estd. 1998
                 </span>
               </div>
             </Link>
