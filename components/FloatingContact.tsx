@@ -25,7 +25,7 @@ export function FloatingContact() {
   );
 
   return (
-    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-3 select-none pointer-events-auto">
+    <div className="fixed bottom-5 right-3.5 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-2.5 sm:gap-3 select-none pointer-events-auto touch-manipulation">
       {/* WhatsApp Circular Floating Icon Button */}
       <div className="relative flex items-center group">
         {/* Elegant Desktop Tooltip Pill */}

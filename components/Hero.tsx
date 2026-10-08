@@ -484,9 +484,26 @@ export function Hero() {
           </h1>
 
           {/* Description */}
-          <p className="text-xs sm:text-lg md:text-xl text-[#E0D4C8] font-sans font-light max-w-2xl mx-auto leading-relaxed mb-5 sm:mb-7">
+          <p className="text-xs sm:text-lg md:text-xl text-[#E0D4C8] font-sans font-light max-w-2xl mx-auto leading-relaxed mb-4 sm:mb-6">
             Authentic Indian chai, crafted with warmth, tradition and a modern soul.
           </p>
+
+          {/* Quick Action CTAs */}
+          <div className="flex items-center justify-center gap-2.5 sm:gap-3.5 w-full max-w-xs sm:max-w-none">
+            <a
+              href="/signature-chai"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-[#DFAB5F] via-[#C69247] to-[#DFAB5F] text-[#0D0806] font-bold text-[11px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.18em] shadow-[0_4px_20px_rgba(198,146,71,0.35)] hover:scale-105 active:scale-95 transition-all"
+            >
+              <span>Explore Chai</span>
+              <ArrowUpRight className="w-3.5 h-3.5 text-[#0D0806]" />
+            </a>
+            <a
+              href="/our-story"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full border border-[#C69247]/50 bg-[#140C08]/80 text-[#FBF6EE] font-medium text-[11px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.18em] backdrop-blur-md hover:border-[#DFAB5F] active:scale-95 transition-all"
+            >
+              <span>Our Story</span>
+            </a>
+          </div>
         </div>
 
         {/* ================= STAGE 2: 33% to 68% (The Slow Boiling Craft) ================= */}

@@ -21,15 +21,33 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: "#0D0806",
+  colorScheme: "dark",
 };
 
 export const metadata: Metadata = {
-  title: "CHAI DA ADDA | Good Tea • Better Vibes",
+  metadataBase: new URL("https://chai-ka-adda.vercel.app"),
+  title: {
+    default: "CHAI DA ADDA | Good Tea • Better Vibes",
+    template: "%s | CHAI DA ADDA",
+  },
   description:
     "Authentic Indian chai, crafted with warmth, tradition and a modern soul. Fresh ginger, cardamom, single-estate Assam tea, and unglazed Varanasi terracotta kulhads.",
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: [
+      { url: "/logo.png", sizes: "any" },
+    ],
+    apple: [
+      { url: "/logo.png", sizes: "180x180" },
+    ],
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Chai Da Adda",
+  },
+  formatDetection: {
+    telephone: false,
   },
   keywords: [
     "Chai Da Adda",
@@ -47,9 +65,23 @@ export const metadata: Metadata = {
     title: "CHAI DA ADDA | Good Tea • Better Vibes",
     description:
       "Authentic Indian chai, crafted with warmth, tradition and a modern soul.",
+    url: "https://chai-ka-adda.vercel.app",
     siteName: "Chai Da Adda",
     locale: "en_IN",
     type: "website",
+    images: [
+      {
+        url: "/logo.png",
+        width: 800,
+        height: 800,
+        alt: "Chai Da Adda — Good Tea • Better Vibes",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CHAI DA ADDA | Good Tea • Better Vibes",
+    description: "Authentic Indian chai, crafted with warmth, tradition and a modern soul.",
     images: ["/logo.png"],
   },
 };

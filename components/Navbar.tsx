@@ -283,50 +283,118 @@ export function Navbar() {
         </motion.div>
       </div>
 
-      {/* Mobile Glassmorphic Drawer with Smooth Downward Reveal */}
+      {/* Mobile Drawer Backdrop & Glassmorphic Panel */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.97 }}
-            transition={{ duration: 0.35, ease: cinematicEase }}
-            className="lg:hidden mt-2.5 mx-auto max-w-lg rounded-3xl bg-[#140C08]/96 border border-[#C69247]/40 backdrop-blur-2xl overflow-hidden shadow-[0_25px_50px_rgba(0,0,0,0.9),0_0_30px_rgba(198,146,71,0.15)] p-5 space-y-3.5 pointer-events-auto"
-          >
-            <div className="space-y-1 pb-1">
-              {navLinks.map((link) => {
-                const isActive = activeSection === link.name;
-                return (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`block px-4 py-2.5 rounded-2xl text-xs uppercase tracking-[0.2em] font-medium transition-all ${
-                      isActive
-                        ? "text-[#DFAB5F] bg-[#1E130D] border border-[#C69247]/40 font-semibold shadow-inner"
-                        : "text-[#FBF6EE]/85 hover:text-[#DFAB5F] hover:bg-[#1E130D]/70"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>{link.name}</span>
-                      {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#DFAB5F] animate-pulse" />}
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+          <>
+            {/* Dark Dimmed Backdrop (Tap to Close) */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 pointer-events-auto lg:hidden"
+            />
 
-            <div className="pt-2.5 border-t border-[#C69247]/25 flex flex-col gap-2">
-              <Link
-                href="/contact"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full py-3 rounded-full bg-gradient-to-r from-[#DFAB5F] to-[#C69247] text-[#0D0806] font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg hover:brightness-110 active:scale-98 transition-all"
-              >
-                <span>Visit The Adda</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          </motion.div>
+            {/* Mobile Glassmorphic Drawer */}
+            <motion.div
+              initial={{ opacity: 0, y: -12, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.96 }}
+              transition={{ duration: 0.3, ease: cinematicEase }}
+              className="lg:hidden relative z-50 mt-2 mx-auto max-w-md w-full rounded-3xl bg-[#120B08]/98 border border-[#C69247]/45 backdrop-blur-2xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(198,146,71,0.2)] p-4 sm:p-5 space-y-3 pointer-events-auto"
+            >
+              {/* Drawer Top Header Banner */}
+              <div className="flex items-center justify-between pb-2.5 border-b border-[#C69247]/25">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full border border-[#DFAB5F]/60 overflow-hidden bg-[#160D09]">
+                    <img src="/logo.png" alt="Chai Da Adda Logo" className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <span className="font-serif text-xs font-bold tracking-[0.2em] text-[#FBF6EE] block leading-tight">
+                      CHAI DA ADDA
+                    </span>
+                    <span className="text-[7.5px] font-mono uppercase tracking-[0.25em] text-[#DFAB5F] block">
+                      Varanasi Heritage
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-1.5 rounded-full bg-[#1E130D] border border-[#C69247]/30 text-[#DFAB5F]"
+                  aria-label="Close Navigation Menu"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Navigation Links */}
+              <div className="space-y-1">
+                {navLinks.map((link) => {
+                  const isActive = activeSection === link.name;
+                  return (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block px-4 py-2.5 rounded-2xl text-xs uppercase tracking-[0.2em] font-medium transition-all ${
+                        isActive
+                          ? "text-[#DFAB5F] bg-[#1E130D] border border-[#C69247]/45 font-semibold shadow-inner"
+                          : "text-[#FBF6EE]/85 hover:text-[#DFAB5F] hover:bg-[#1E130D]/70 active:scale-[0.98]"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span>{link.name}</span>
+                        {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#DFAB5F] shadow-[0_0_8px_#DFAB5F]" />}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* Action Buttons: Visit Adda, WhatsApp & Call */}
+              <div className="pt-2 border-t border-[#C69247]/25 space-y-2">
+                <Link
+                  href="/contact"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#DFAB5F] via-[#C69247] to-[#DFAB5F] text-[#0D0806] font-bold text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-lg hover:brightness-110 active:scale-[0.98] transition-all"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#0D0806]" />
+                  <span>Visit The Adda</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </Link>
+
+                <div className="grid grid-cols-2 gap-2 pt-0.5">
+                  <a
+                    href="https://wa.me/917300212948?text=Namaste%20Chai%20Ka%20Adda,%20I%20would%20like%20to%20connect."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="py-2.5 px-3 rounded-xl bg-[#25D366]/15 border border-[#25D366]/40 text-[#25D366] font-mono text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all"
+                  >
+                    <span>WhatsApp</span>
+                  </a>
+
+                  <a
+                    href="tel:+917300212948"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="py-2.5 px-3 rounded-xl bg-[#0087FF]/15 border border-[#0087FF]/40 text-[#0087FF] font-mono text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all"
+                  >
+                    <span>Call Now</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Live Hours Footer Note */}
+              <div className="text-center pt-1">
+                <span className="text-[10px] font-mono text-[#DFAB5F]/80">
+                  Open 6:00 AM – 2:00 AM Daily • Heritage Kulhads
+                </span>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </motion.header>
