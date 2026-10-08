@@ -3,6 +3,7 @@ import { Cinzel, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { FloatingContact } from "@/components/FloatingContact";
+import { VoiceGreeting } from "@/components/VoiceGreeting";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -106,6 +107,7 @@ export default function RootLayout({
         />
         <SmoothScroll>{children}</SmoothScroll>
         <FloatingContact />
+        <VoiceGreeting />
       </body>
     </html>
   );
