@@ -280,12 +280,12 @@ export function Navbar() {
               <div className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1E130D]/90 border border-[#C69247]/30 text-[10px] font-mono text-[#DFAB5F]">
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    !mounted || isOpenNow
+                    mounted && isOpenNow
                       ? "bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"
                       : "bg-amber-400"
                   }`}
                 />
-                <span>{!mounted || isOpenNow ? "Open Now • 6 AM–2 AM" : "Opens at 6 AM"}</span>
+                <span>{mounted && isOpenNow ? "Open Now • 6 AM–2 AM" : "Open 6 AM–2 AM"}</span>
               </div>
 
               <Link
@@ -329,13 +329,13 @@ export function Navbar() {
               <div className="flex items-center gap-1.5">
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    !mounted || isOpenNow
+                    mounted && isOpenNow
                       ? "bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"
                       : "bg-amber-400"
                   }`}
                 />
                 <span className="text-[11px] font-mono text-[#DFAB5F]">
-                  {!mounted || isOpenNow ? "Open Now • Fresh Dum Brewing" : "Opens at 6:00 AM Daily"}
+                  {mounted && isOpenNow ? "Open Now • Fresh Dum Brewing" : "Open 6:00 AM – 2:00 AM Daily"}
                 </span>
               </div>
               <span className="text-[10px] font-mono text-[#D8CCC0]/60">Varanasi, UP</span>
