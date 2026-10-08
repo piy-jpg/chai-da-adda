@@ -28,16 +28,17 @@ export function FloatingContact() {
         <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 fill-current relative z-10" />
       </motion.a>
 
-      {/* Direct Call Circular Floating Icon Button */}
+      {/* Direct Call Circular Floating Icon Button (Truecaller Blue) */}
       <motion.a
         whileHover={{ scale: 1.12, y: -2 }}
         whileTap={{ scale: 0.92 }}
         href={`tel:+91${OWNER_PHONE}`}
         title="Call Owner (7300212948)"
-        className="relative w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-gradient-to-tr from-[#C69247] via-[#DFAB5F] to-[#DFAB5F] text-[#0D0806] flex items-center justify-center shadow-[0_8px_25px_rgba(198,146,71,0.4)] hover:shadow-[0_12px_30px_rgba(198,146,71,0.6)] transition-shadow duration-300 group"
+        aria-label="Call Chai Da Adda on 7300212948"
+        className="relative w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-gradient-to-tr from-[#0066FF] via-[#0087FF] to-[#0099FF] text-white flex items-center justify-center shadow-[0_8px_25px_rgba(0,135,255,0.45)] hover:shadow-[0_12px_30px_rgba(0,135,255,0.7)] transition-shadow duration-300 group"
       >
         {/* Subtle Pulse Ring */}
-        <span className="absolute -inset-1 rounded-full bg-[#DFAB5F] opacity-30 group-hover:opacity-60 animate-ping pointer-events-none" style={{ animationDuration: "2.5s" }} />
+        <span className="absolute -inset-1 rounded-full bg-[#0087FF] opacity-30 group-hover:opacity-60 animate-ping pointer-events-none" style={{ animationDuration: "2.5s" }} />
         <Phone className="w-4.5 h-4.5 sm:w-5.5 sm:h-5.5 fill-current relative z-10" />
       </motion.a>
     </div>
