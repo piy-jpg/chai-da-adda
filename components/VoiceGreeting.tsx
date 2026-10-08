@@ -11,10 +11,10 @@ export function VoiceGreeting() {
   const [hasPlayed, setHasPlayed] = useState(false);
   const [mounted, setMounted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const hasAttemptedAutoplayRef = useRef(false);
+  const isUnlockedRef = useRef(false);
   const shouldReduceMotion = useReducedMotion();
 
-  // Play audio safely handling browser autoplay locks
+  // Play audio safely
   const playAudio = useCallback(() => {
     if (!audioRef.current) {
       const audio = new Audio(AUDIO_SRC);
@@ -31,9 +31,10 @@ export function VoiceGreeting() {
         .then(() => {
           setIsPlaying(true);
           setHasPlayed(true);
+          isUnlockedRef.current = true;
         })
-        .catch(() => {
-          // Autoplay was blocked by browser; will unlock on first user gesture
+        .catch((err) => {
+          console.debug("[VoiceGreeting] Playback waiting for user gesture:", err?.message || err);
           setIsPlaying(false);
         });
     }
@@ -48,7 +49,7 @@ export function VoiceGreeting() {
     setIsPlaying(false);
   }, []);
 
-  // Toggle playback
+  // Toggle playback on button/pill click
   const handleTogglePlay = useCallback(
     (e?: React.MouseEvent) => {
       if (e) {
@@ -66,7 +67,7 @@ export function VoiceGreeting() {
   useEffect(() => {
     setMounted(true);
 
-    // Instantiate HTML5 Audio
+    // Create and initialize audio element
     const audio = new Audio(AUDIO_SRC);
     audio.preload = "auto";
     audioRef.current = audio;
@@ -84,61 +85,59 @@ export function VoiceGreeting() {
     audio.addEventListener("pause", onPause);
     audio.addEventListener("error", onError);
 
-    // 1. Immediate 0ms attempt on page load
+    // 1. Attempt immediate zero-click playback on visit
     const initialPlayPromise = audio.play();
     if (initialPlayPromise !== undefined) {
       initialPlayPromise
         .then(() => {
           setIsPlaying(true);
           setHasPlayed(true);
-          hasAttemptedAutoplayRef.current = true;
+          isUnlockedRef.current = true;
         })
         .catch(() => {
-          // Browser requires user interaction; setup universal listeners
+          // Autoplay was blocked by the browser policy.
+          // Setup user gesture listeners for guaranteed 1st tap/click unlock.
         });
     }
 
-    // 2. Instant trigger on ANY user interaction (touch, scroll, click, tap, wheel)
-    const handleFirstUserGesture = () => {
-      if (hasAttemptedAutoplayRef.current) return;
-      hasAttemptedAutoplayRef.current = true;
+    // 2. Browser-compliant user gesture unlock
+    // Note: Chrome/Safari ONLY count pointerdown, touchstart, click, and keydown as user gestures.
+    // Pure wheel/scroll events are not considered transient activation by browser security.
+    const handleUserGesture = () => {
+      if (isUnlockedRef.current) return;
 
       audio.currentTime = 0;
-      audio
-        .play()
-        .then(() => {
-          setIsPlaying(true);
-          setHasPlayed(true);
-        })
-        .catch(() => {});
-
-      removeInteractionListeners();
+      const promise = audio.play();
+      if (promise !== undefined) {
+        promise
+          .then(() => {
+            isUnlockedRef.current = true;
+            setIsPlaying(true);
+            setHasPlayed(true);
+            cleanupGestureListeners();
+          })
+          .catch(() => {
+            // Keep listeners alive if still locked
+          });
+      }
     };
 
     const options: AddEventListenerOptions = { capture: true, passive: true };
 
-    const addInteractionListeners = () => {
-      document.addEventListener("pointerdown", handleFirstUserGesture, options);
-      document.addEventListener("touchstart", handleFirstUserGesture, options);
-      document.addEventListener("click", handleFirstUserGesture, options);
-      window.addEventListener("scroll", handleFirstUserGesture, options);
-      window.addEventListener("wheel", handleFirstUserGesture, options);
-      window.addEventListener("keydown", handleFirstUserGesture, options);
+    const cleanupGestureListeners = () => {
+      document.removeEventListener("pointerdown", handleUserGesture, true);
+      document.removeEventListener("touchstart", handleUserGesture, true);
+      document.removeEventListener("click", handleUserGesture, true);
+      window.removeEventListener("keydown", handleUserGesture, true);
     };
 
-    const removeInteractionListeners = () => {
-      document.removeEventListener("pointerdown", handleFirstUserGesture, options);
-      document.removeEventListener("touchstart", handleFirstUserGesture, options);
-      document.removeEventListener("click", handleFirstUserGesture, options);
-      window.removeEventListener("scroll", handleFirstUserGesture, options);
-      window.removeEventListener("wheel", handleFirstUserGesture, options);
-      window.removeEventListener("keydown", handleFirstUserGesture, options);
-    };
-
-    addInteractionListeners();
+    document.addEventListener("pointerdown", handleUserGesture, options);
+    document.addEventListener("touchstart", handleUserGesture, options);
+    document.addEventListener("click", handleUserGesture, options);
+    window.addEventListener("keydown", handleUserGesture, options);
 
     return () => {
-      removeInteractionListeners();
+      cleanupGestureListeners();
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("pause", onPause);
@@ -199,7 +198,7 @@ export function VoiceGreeting() {
           </div>
 
           <span className="text-[8.5px] sm:text-[9.5px] font-mono text-[#DFAB5F]/90 uppercase tracking-widest leading-tight mt-0.5">
-            {isPlaying ? "Playing Live • Tap to Mute" : hasPlayed ? "Tap to Replay Voice" : "Tap or Scroll to Play"}
+            {isPlaying ? "Playing Live • Tap to Mute" : hasPlayed ? "Tap to Replay Voice" : "Tap Anywhere to Hear Voice"}
           </span>
         </div>
       </motion.div>
