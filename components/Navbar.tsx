@@ -125,7 +125,7 @@ export function Navbar() {
       initial={shouldReduceMotion ? { opacity: 0 } : { y: -16, opacity: 0 }}
       animate={shouldReduceMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: cinematicEase }}
-      className="fixed top-0 left-0 right-0 z-50 py-3.5 sm:py-5 px-3 sm:px-6 lg:px-8 pointer-events-none"
+      className="fixed top-0 left-0 right-0 z-50 py-2 sm:py-3 px-3 sm:px-6 lg:px-8 pointer-events-none"
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between pointer-events-auto">
         {/* Floating Oscillation Wrapper */}
@@ -148,10 +148,10 @@ export function Navbar() {
           {/* Main Floating Glass Capsule */}
           <nav
             aria-label="Main Navigation"
-            className={`w-full flex items-center justify-between gap-3 sm:gap-6 px-4 sm:px-6 transition-all duration-500 rounded-full relative overflow-hidden ${
+            className={`w-full flex items-center justify-between gap-3 sm:gap-6 px-3.5 sm:px-6 transition-all duration-300 rounded-full relative overflow-hidden min-h-[62px] sm:min-h-[68px] ${
               isScrolled
-                ? "py-2 sm:py-2.5 bg-[#0D0806]/92 backdrop-blur-2xl border border-[#C69247]/45 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_25px_rgba(198,146,71,0.12),inset_0_1px_1px_rgba(255,255,255,0.08)]"
-                : "py-2.5 sm:py-3 bg-[#140C08]/85 backdrop-blur-xl border border-[#C69247]/30 shadow-[0_15px_35px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.05)]"
+                ? "py-1.5 sm:py-2 bg-[#0D0806]/94 backdrop-blur-2xl border border-[#C69247]/45 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_25px_rgba(198,146,71,0.12),inset_0_1px_1px_rgba(255,255,255,0.08)]"
+                : "py-2 sm:py-2.5 bg-[#140C08]/90 backdrop-blur-xl border border-[#C69247]/35 shadow-[0_15px_35px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.06)]"
             }`}
           >
             {/* Top Specular Rim Reflection */}
@@ -177,7 +177,7 @@ export function Navbar() {
               href="/"
               className="flex items-center gap-2.5 sm:gap-3 group cursor-pointer shrink-0 z-10"
             >
-              <div className="relative">
+              <div className="relative shrink-0">
                 {/* Ambient Halo Behind Logo */}
                 <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#DFAB5F]/40 to-[#C69247]/20 blur-md opacity-80 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
@@ -185,21 +185,21 @@ export function Navbar() {
                   whileHover={shouldReduceMotion ? undefined : { scale: 1.08, rotate: -3 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.3, ease: cinematicEase }}
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#DFAB5F]/70 bg-[#160D09] p-0.5 shadow-[0_0_15px_rgba(223,171,95,0.35)] group-hover:border-[#DFAB5F] group-hover:shadow-[0_0_20px_rgba(223,171,95,0.6)] transition-all duration-300 relative z-10 overflow-hidden flex items-center justify-center"
+                  className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 aspect-square rounded-full border border-[#DFAB5F]/75 bg-[#160D09] p-0.5 shadow-[0_0_15px_rgba(223,171,95,0.35)] group-hover:border-[#DFAB5F] group-hover:shadow-[0_0_20px_rgba(223,171,95,0.6)] transition-all duration-300 relative z-10 overflow-hidden flex items-center justify-center shrink-0"
                 >
                   <img
                     src="/logo.png"
                     alt="Chai Da Adda Official Logo"
-                    className="w-full h-full object-cover rounded-full"
+                    className="w-full h-full object-cover rounded-full aspect-square block"
                   />
                 </motion.div>
               </div>
 
               <div className="flex flex-col select-none">
-                <span className="font-serif text-xs sm:text-[13px] font-bold tracking-[0.22em] text-[#FBF6EE] group-hover:text-[#DFAB5F] transition-colors leading-tight drop-shadow-sm">
+                <span className="font-serif text-xs sm:text-[13px] font-bold tracking-[0.2em] text-[#FBF6EE] group-hover:text-[#DFAB5F] transition-colors leading-tight drop-shadow-sm">
                   CHAI DA ADDA
                 </span>
-                <span className="text-[7.5px] sm:text-[8px] font-mono uppercase tracking-[0.32em] text-[#DFAB5F]/85 leading-tight flex items-center gap-1">
+                <span className="text-[7.5px] sm:text-[8px] font-mono uppercase tracking-[0.28em] text-[#DFAB5F] leading-tight flex items-center gap-1">
                   <span>Good Tea • Better Vibes</span>
                 </span>
               </div>

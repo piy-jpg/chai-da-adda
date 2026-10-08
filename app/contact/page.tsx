@@ -131,7 +131,7 @@ export default function ContactPage() {
         {/* ========================================================================= */}
         {/* HERO SECTION                                                             */}
         {/* ========================================================================= */}
-        <section className="relative pt-32 sm:pt-40 lg:pt-44 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8 border-b border-[#C69247]/25 overflow-hidden">
+        <section className="relative pt-24 sm:pt-28 lg:pt-32 pb-14 sm:pb-20 px-4 sm:px-6 lg:px-8 border-b border-[#C69247]/25 overflow-hidden">
           {/* Razor-Sharp Ambient Backlight */}
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[750px] h-[350px] bg-gradient-to-b from-[#DFAB5F]/15 via-[#C69247]/8 to-transparent rounded-full blur-[140px] pointer-events-none" />
 

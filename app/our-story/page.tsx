@@ -183,7 +183,7 @@ export default function OurStoryPage() {
       {/* ========================================================================= */}
       {/* 1. HERO SECTION */}
       {/* ========================================================================= */}
-      <section className="relative pt-32 sm:pt-40 md:pt-46 pb-16 md:pb-24 overflow-hidden z-10">
+      <section className="relative pt-24 sm:pt-28 md:pt-32 pb-14 md:pb-20 overflow-hidden z-10">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 relative z-10">
           
           {/* Breadcrumb & Sound Controls Bar */}

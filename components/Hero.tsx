@@ -462,7 +462,7 @@ export function Hero() {
       <div className="relative z-20 w-full h-full max-w-5xl mx-auto px-4 sm:px-8 flex flex-col items-center justify-center text-center">
         {/* ================= STAGE 1: 0% to 32% (Grand Opening) ================= */}
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 transition-all duration-500 pointer-events-auto"
+          className="absolute inset-0 flex flex-col items-center justify-center pt-16 sm:pt-20 pb-8 px-4 sm:px-6 transition-all duration-500 pointer-events-auto"
           style={{
             opacity: scrollProgress <= 0.32 ? Math.max(0, 1 - scrollProgress * 3.2) : 0,
             transform: `translateY(${scrollProgress * -35}px)`,
@@ -470,13 +470,13 @@ export function Hero() {
           }}
         >
           {/* Brand Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full border border-[#C69247]/30 bg-[#1E130D]/75 backdrop-blur-md text-[#DFAB5F] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] sm:tracking-[0.3em] mb-4 sm:mb-6 shadow-xl">
+          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full border border-[#C69247]/35 bg-[#1E130D]/85 backdrop-blur-md text-[#DFAB5F] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] sm:tracking-[0.3em] mb-3 sm:mb-5 shadow-xl">
             <Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-[#DFAB5F]" />
-            <span>CHAI KA ADDA</span>
+            <span>CHAI DA ADDA</span>
           </div>
 
           {/* Main Headline */}
-          <h1 className="text-3xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-normal text-[#FBF6EE] leading-[1.1] sm:leading-[1.08] tracking-tight mb-4 sm:mb-6 drop-shadow-2xl">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-normal text-[#FBF6EE] leading-[1.12] sm:leading-[1.1] tracking-tight mb-3 sm:mb-5 drop-shadow-2xl max-w-4xl">
             More Than Chai. <br />
             <span className="text-gold-gradient italic font-normal">
               It&apos;s An Experience.
@@ -484,14 +484,14 @@ export function Hero() {
           </h1>
 
           {/* Description */}
-          <p className="text-xs sm:text-xl md:text-2xl text-[#D8CCC0] font-sans font-light max-w-2xl mx-auto leading-relaxed mb-6 sm:mb-8">
+          <p className="text-xs sm:text-lg md:text-xl text-[#E0D4C8] font-sans font-light max-w-2xl mx-auto leading-relaxed mb-5 sm:mb-7">
             Authentic Indian chai, crafted with warmth, tradition and a modern soul.
           </p>
         </div>
 
         {/* ================= STAGE 2: 33% to 68% (The Slow Boiling Craft) ================= */}
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 transition-all duration-500"
+          className="absolute inset-0 flex flex-col items-center justify-center pt-16 sm:pt-20 pb-8 px-4 sm:px-6 transition-all duration-500"
           style={{
             opacity:
               scrollProgress > 0.28 && scrollProgress < 0.72
@@ -501,19 +501,19 @@ export function Hero() {
             pointerEvents: scrollProgress > 0.32 && scrollProgress < 0.68 ? "auto" : "none",
           }}
         >
-          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full border border-[#C69247]/30 bg-[#1E130D]/75 backdrop-blur-md text-[#DFAB5F] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.22em] sm:tracking-[0.25em] mb-3 sm:mb-5">
+          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full border border-[#C69247]/35 bg-[#1E130D]/85 backdrop-blur-md text-[#DFAB5F] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.22em] sm:tracking-[0.25em] mb-3 sm:mb-4">
             <Flame className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-[#DFAB5F]" />
             <span>THE SLOW DUM CRAFT</span>
           </div>
 
-          <h2 className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#FBF6EE] leading-tight mb-3 sm:mb-5 drop-shadow-2xl">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-[#FBF6EE] leading-tight mb-3 sm:mb-4 drop-shadow-2xl">
             Slow Brass Boiling. <br />
             <span className="text-gold-gradient italic font-normal">
               18 Hand-Pounded Spices.
             </span>
           </h2>
 
-          <p className="text-xs sm:text-lg md:text-xl text-[#D8CCC0] font-sans font-light max-w-xl mx-auto leading-relaxed mb-5 sm:mb-8">
+          <p className="text-xs sm:text-base md:text-lg text-[#E0D4C8] font-sans font-light max-w-xl mx-auto leading-relaxed mb-4 sm:mb-6">
             Single-estate Upper Assam leaves simmered with fragrant Idukki cardamom, fiery adrak, and pure mountain water.
           </p>
 
@@ -521,7 +521,7 @@ export function Hero() {
             {["Single-Estate Assam", "Stone-Crushed Spices", "Varanasi Kiln Kulhads"].map((tag, i) => (
               <span
                 key={i}
-                className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-[#1E130D]/80 border border-[#C69247]/25 text-[10px] sm:text-xs text-[#DFAB5F] font-mono uppercase tracking-wider"
+                className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-[#1E130D]/85 border border-[#C69247]/30 text-[10px] sm:text-xs text-[#DFAB5F] font-mono uppercase tracking-wider"
               >
                 {tag}
               </span>
@@ -531,34 +531,34 @@ export function Hero() {
 
         {/* ================= STAGE 3: 69% to 100% (The Grand Climax & CTAs) ================= */}
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 transition-all duration-500"
+          className="absolute inset-0 flex flex-col items-center justify-center pt-16 sm:pt-20 pb-8 px-4 sm:px-6 transition-all duration-500"
           style={{
             opacity: scrollProgress >= 0.68 ? Math.min(1, (scrollProgress - 0.68) * 3.5) : 0,
             transform: `translateY(${(1 - scrollProgress) * 25}px)`,
             pointerEvents: scrollProgress >= 0.7 ? "auto" : "none",
           }}
         >
-          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full border border-[#C69247]/30 bg-[#1E130D]/75 backdrop-blur-md text-[#DFAB5F] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] sm:tracking-[0.3em] mb-3 sm:mb-5">
+          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full border border-[#C69247]/35 bg-[#1E130D]/85 backdrop-blur-md text-[#DFAB5F] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] sm:tracking-[0.3em] mb-3 sm:mb-4">
             <Coffee className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-[#DFAB5F]" />
             <span>YOUR CUP IS READY</span>
           </div>
 
-          <h2 className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#FBF6EE] leading-tight mb-3 sm:mb-5 drop-shadow-2xl">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-[#FBF6EE] leading-tight mb-3 sm:mb-4 drop-shadow-2xl">
             Every Sip Begins <br />
             <span className="text-gold-gradient italic font-normal">
               A Timeless Conversation.
             </span>
           </h2>
 
-          <p className="text-xs sm:text-xl text-[#D8CCC0] font-sans font-light max-w-xl mx-auto leading-relaxed mb-6 sm:mb-10">
+          <p className="text-xs sm:text-base md:text-lg text-[#E0D4C8] font-sans font-light max-w-xl mx-auto leading-relaxed mb-5 sm:mb-8">
             Step into the Adda and taste the rich soul of authentic Indian chai culture.
           </p>
 
           {/* Action CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 w-full max-w-xs sm:max-w-none">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 w-full max-w-xs sm:max-w-none">
             <a
               href="#chai"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-[#C69247] hover:bg-[#DFAB5F] text-[#0D0806] font-bold text-xs sm:text-sm uppercase tracking-[0.18em] sm:tracking-[0.2em] transition-all duration-300 hover:scale-105 gold-glow shadow-lg"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-[#C69247] hover:bg-[#DFAB5F] text-[#0D0806] font-bold text-xs sm:text-sm uppercase tracking-[0.18em] sm:tracking-[0.2em] transition-all duration-300 hover:scale-105 gold-glow shadow-lg"
             >
               <span>Explore Our Chai</span>
               <ArrowUpRight className="w-4 h-4" />
@@ -566,7 +566,7 @@ export function Hero() {
 
             <a
               href="#visit"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 sm:px-8 py-3.5 sm:py-4 rounded-full border border-[#C69247]/40 bg-[#140C08]/80 hover:bg-[#C69247]/15 hover:border-[#DFAB5F] text-[#FBF6EE] font-medium text-xs sm:text-sm uppercase tracking-[0.18em] sm:tracking-[0.2em] transition-all duration-300 hover:scale-105 backdrop-blur-sm shadow-md"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-3.5 rounded-full border border-[#C69247]/40 bg-[#140C08]/80 hover:bg-[#C69247]/15 hover:border-[#DFAB5F] text-[#FBF6EE] font-medium text-xs sm:text-sm uppercase tracking-[0.18em] sm:tracking-[0.2em] transition-all duration-300 hover:scale-105 backdrop-blur-sm shadow-md"
             >
               Visit The Adda
             </a>
