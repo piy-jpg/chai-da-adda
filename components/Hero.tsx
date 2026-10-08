@@ -292,10 +292,10 @@ function Hero3DCanvas() {
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="absolute inset-0 pointer-events-auto z-15 overflow-hidden"
+      className="absolute inset-0 pointer-events-none z-10 overflow-hidden"
       aria-hidden="true"
     >
-      <canvas ref={canvasRef} className="w-full h-full block" />
+      <canvas ref={canvasRef} className="w-full h-full block pointer-events-none" />
     </div>
   );
 }
@@ -341,14 +341,14 @@ export function Hero() {
         video.playsInline = true;
         video.play().catch(() => {});
 
-        // 2. Drive multi-stage narrative & background scale via ScrollTrigger
+        // 2. Drive multi-stage narrative & background scale via calibrated mobile ScrollTrigger
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: container,
             start: "top top",
-            end: "+=1500",
+            end: "+=1000",
             pin: true,
-            scrub: 0.6,
+            scrub: 0.5,
             anticipatePin: 1,
             onUpdate: (self) => {
               setScrollProgress(self.progress);
@@ -359,7 +359,7 @@ export function Hero() {
         tl.to(
           video,
           {
-            scale: 1.08,
+            scale: 1.06,
             ease: "power1.inOut",
           },
           0
@@ -375,7 +375,7 @@ export function Hero() {
           scrollTrigger: {
             trigger: container,
             start: "top top",
-            end: "+=2800",
+            end: "+=2600",
             pin: true,
             scrub: 0.8,
             anticipatePin: 1,
@@ -438,11 +438,11 @@ export function Hero() {
       <div className="absolute inset-0 w-full h-full overflow-hidden">
         <video
           ref={videoRef}
+          autoPlay
           muted
           playsInline
-          autoPlay={isMobile}
-          loop={isMobile}
-          preload="auto"
+          loop
+          preload="metadata"
           className="w-full h-full object-cover transform-gpu pointer-events-none filter brightness-95"
         >
           <source src="/videos/chai-ka-adda.mp4" type="video/mp4" />
