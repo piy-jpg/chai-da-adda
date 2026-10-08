@@ -3,7 +3,6 @@
 import React from "react";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
-import { BrandStory } from "@/components/BrandStory";
 import { ChaiProducts } from "@/components/ChaiProducts";
 import { Experience } from "@/components/Experience";
 import { WhyChai } from "@/components/WhyChai";
@@ -21,10 +20,7 @@ export default function Home() {
       {/* Section 1: Hero Video (public/videos/chai-ka-adda.mp4) */}
       <Hero />
 
-      {/* Section 2: Our Story */}
-      <BrandStory />
-
-      {/* Section 3: Signature Chai (Masala, Adrak, Elaichi, Kesar) */}
+      {/* Section 2: Signature Chai (Masala, Adrak, Elaichi, Kesar) */}
       <ChaiProducts />
 
       {/* Section 4: The Adda Experience */}

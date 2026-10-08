@@ -364,7 +364,7 @@ export function VisitUs() {
   return (
     <section
       id="visit"
-      className="relative py-16 md:py-20 bg-[#0A0604] overflow-hidden film-grain select-none"
+      className="relative pt-14 md:pt-18 pb-10 md:pb-12 bg-[#0A0604] overflow-hidden film-grain select-none"
     >
       {/* 1. Full Complete Animated Background Chai Visual (Ken Burns Slow Zoom) */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">

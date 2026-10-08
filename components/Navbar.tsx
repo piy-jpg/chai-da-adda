@@ -1,33 +1,106 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Coffee, Menu, X, ArrowUpRight } from "lucide-react";
+import { Coffee, Menu, X, ArrowUpRight, Sparkles } from "lucide-react";
 
 export function Navbar() {
+  const pathname = usePathname();
+  const isOurStoryPage = pathname === "/our-story";
+  const isSignatureChaiPage = pathname === "/signature-chai";
+  const isExperiencePage = pathname === "/experience";
+  const isWhyUsPage = pathname === "/why-us";
+  const isContactPage = pathname === "/contact";
+  const isStandalonePage = isOurStoryPage || isSignatureChaiPage || isExperiencePage || isWhyUsPage || isContactPage;
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState<string>("HOME");
+  const [activeSection, setActiveSection] = useState<string>(
+    isOurStoryPage
+      ? "OUR STORY"
+      : isSignatureChaiPage
+      ? "SIGNATURE CHAI"
+      : isExperiencePage
+      ? "EXPERIENCE"
+      : isWhyUsPage
+      ? "WHY US"
+      : isContactPage
+      ? "CONTACT"
+      : "HOME"
+  );
   const shouldReduceMotion = useReducedMotion();
 
   const navLinks = [
-    { name: "HOME", href: "#home", id: "home" },
-    { name: "OUR STORY", href: "#story", id: "story" },
-    { name: "SIGNATURE CHAI", href: "#chai", id: "chai" },
-    { name: "EXPERIENCE", href: "#experience", id: "experience" },
-    { name: "WHY US", href: "#why", id: "why" },
-    { name: "CONTACT", href: "#visit", id: "visit" },
+    { name: "HOME", href: isStandalonePage ? "/#home" : "#home", id: "home", isExternalPage: false },
+    { name: "OUR STORY", href: "/our-story", id: "story", isExternalPage: true },
+    { name: "SIGNATURE CHAI", href: "/signature-chai", id: "chai", isExternalPage: true },
+    { name: "EXPERIENCE", href: "/experience", id: "experience", isExternalPage: true },
+    { name: "WHY US", href: "/why-us", id: "why", isExternalPage: true },
+    { name: "CONTACT", href: "/contact", id: "contact", isExternalPage: true },
   ];
 
-  // 1. Scroll & Active Section Sensing
+  // Scroll & Active Section Sensing
   useEffect(() => {
+    if (isOurStoryPage) {
+      setActiveSection("OUR STORY");
+      const handleScroll = () => {
+        setIsScrolled(window.scrollY > 25);
+      };
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      handleScroll();
+      return () => window.removeEventListener("scroll", handleScroll);
+    }
+
+    if (isSignatureChaiPage) {
+      setActiveSection("SIGNATURE CHAI");
+      const handleScroll = () => {
+        setIsScrolled(window.scrollY > 25);
+      };
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      handleScroll();
+      return () => window.removeEventListener("scroll", handleScroll);
+    }
+
+    if (isExperiencePage) {
+      setActiveSection("EXPERIENCE");
+      const handleScroll = () => {
+        setIsScrolled(window.scrollY > 25);
+      };
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      handleScroll();
+      return () => window.removeEventListener("scroll", handleScroll);
+    }
+
+    if (isWhyUsPage) {
+      setActiveSection("WHY US");
+      const handleScroll = () => {
+        setIsScrolled(window.scrollY > 25);
+      };
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      handleScroll();
+      return () => window.removeEventListener("scroll", handleScroll);
+    }
+
+    if (isContactPage) {
+      setActiveSection("CONTACT");
+      const handleScroll = () => {
+        setIsScrolled(window.scrollY > 25);
+      };
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      handleScroll();
+      return () => window.removeEventListener("scroll", handleScroll);
+    }
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 25);
 
-      // Detect active section
+      // Detect active section on homepage
       const scrollPos = window.scrollY + 200;
       for (const link of navLinks) {
+        if (link.isExternalPage) continue;
         const el = document.getElementById(link.id);
         if (el) {
           const top = el.offsetTop;
@@ -43,201 +116,216 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isOurStoryPage, isSignatureChaiPage, isExperiencePage, isWhyUsPage, isContactPage]);
 
   const cinematicEase = [0.22, 1, 0.36, 1] as const;
 
   return (
     <motion.header
-      initial={shouldReduceMotion ? { opacity: 0 } : { y: -12, opacity: 0 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { y: -16, opacity: 0 }}
       animate={shouldReduceMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
-      transition={{ duration: 0.7, ease: cinematicEase }}
-      className="fixed top-0 left-0 right-0 z-50 py-3 sm:py-4 px-3 sm:px-6 lg:px-8 pointer-events-none"
+      transition={{ duration: 0.8, ease: cinematicEase }}
+      className="fixed top-0 left-0 right-0 z-50 py-3.5 sm:py-5 px-3 sm:px-6 lg:px-8 pointer-events-none"
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between pointer-events-auto">
-        {/* Subtle Floating Oscillation Container */}
+        {/* Floating Oscillation Wrapper */}
         <motion.div
           animate={
             shouldReduceMotion
               ? undefined
               : {
-                  y: [0, -1.5, 0],
+                  y: [0, -2, 0],
                 }
           }
           transition={{
-            duration: 7,
+            duration: 6,
             repeat: Infinity,
             ease: "easeInOut",
-            delay: 0.7,
+            delay: 0.5,
           }}
           className="w-full"
         >
-          {/* Floating Glassmorphic Brand & Nav Bar Pill Container */}
+          {/* Main Floating Glass Capsule */}
           <nav
             aria-label="Main Navigation"
             className={`w-full flex items-center justify-between gap-3 sm:gap-6 px-4 sm:px-6 transition-all duration-500 rounded-full relative overflow-hidden ${
               isScrolled
-                ? "py-2 sm:py-2 bg-[#100906]/94 backdrop-blur-2xl border border-[#C69247]/40 shadow-[0_15px_35px_rgba(0,0,0,0.85),0_0_25px_rgba(198,146,71,0.08)]"
-                : "py-2.5 sm:py-2.5 bg-[#140C08]/80 backdrop-blur-xl border border-[#C69247]/25 shadow-2xl"
+                ? "py-2 sm:py-2.5 bg-[#0D0806]/92 backdrop-blur-2xl border border-[#C69247]/45 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_25px_rgba(198,146,71,0.12),inset_0_1px_1px_rgba(255,255,255,0.08)]"
+                : "py-2.5 sm:py-3 bg-[#140C08]/85 backdrop-blur-xl border border-[#C69247]/30 shadow-[0_15px_35px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.05)]"
             }`}
           >
-            {/* 4. Polished Brass Gold Light Sweep along the Border */}
+            {/* Top Specular Rim Reflection */}
+            <div className="absolute top-0 left-10 right-10 h-[1px] bg-gradient-to-r from-transparent via-[#DFAB5F]/35 to-transparent pointer-events-none" />
+
+            {/* Polished Gold Light Sweep */}
             {!shouldReduceMotion && (
               <motion.div
                 initial={{ x: "-100%" }}
-                animate={{ x: ["-100%", "200%"] }}
+                animate={{ x: ["-100%", "250%"] }}
                 transition={{
-                  duration: 2.8,
+                  duration: 3.2,
                   repeat: Infinity,
-                  repeatDelay: 8.5,
+                  repeatDelay: 6,
                   ease: "easeInOut",
                 }}
                 className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-[#DFAB5F]/15 to-transparent pointer-events-none -skew-x-12"
               />
             )}
 
-            {/* 5. Brand Logo with Stable Text & Scaled Cup on Hover */}
-            <motion.a
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
-              href="#home"
-              className="flex items-center gap-2.5 group cursor-pointer shrink-0 z-10"
+            {/* Brand Logo with Animated Coffee Steam */}
+            <Link
+              href="/"
+              className="flex items-center gap-3 group cursor-pointer shrink-0 z-10"
             >
               <div className="relative">
-                {/* Soft warm-gold glow behind cup */}
-                <div className="absolute -inset-1 rounded-full bg-[#DFAB5F]/20 blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                {/* Ambient Halo Behind Cup */}
+                <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-[#DFAB5F]/30 to-[#C69247]/10 blur-md opacity-70 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
                 <motion.div
-                  whileHover={shouldReduceMotion ? undefined : { scale: 1.06 }}
+                  whileHover={shouldReduceMotion ? undefined : { scale: 1.08, rotate: -4 }}
+                  whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.3, ease: cinematicEase }}
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-[#C69247]/45 bg-[#1E130D] flex items-center justify-center text-[#DFAB5F] group-hover:border-[#DFAB5F] group-hover:shadow-[0_0_14px_rgba(223,171,95,0.35)] transition-all duration-300 relative z-10"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#C69247]/50 bg-[#1E130D] flex items-center justify-center text-[#DFAB5F] group-hover:border-[#DFAB5F] group-hover:shadow-[0_0_16px_rgba(223,171,95,0.45)] transition-all duration-300 relative z-10 shadow-inner"
                 >
-                  <Coffee className="w-4 h-4 text-[#DFAB5F]" />
+                  <Coffee className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-[#DFAB5F] transition-transform duration-300 group-hover:scale-110" />
+
+                  {/* Micro Steam Dot */}
+                  <span className="absolute -top-0.5 right-2 w-1.5 h-1.5 rounded-full bg-[#DFAB5F] animate-ping opacity-75" />
                 </motion.div>
               </div>
 
               <div className="flex flex-col select-none">
-                <span className="font-serif text-xs sm:text-sm font-bold tracking-[0.2em] text-[#FBF6EE] group-hover:text-[#DFAB5F] transition-colors leading-tight">
+                <span className="font-serif text-xs sm:text-[13px] font-bold tracking-[0.22em] text-[#FBF6EE] group-hover:text-[#DFAB5F] transition-colors leading-tight drop-shadow-sm">
                   CHAI KA ADDA
                 </span>
-                <span className="text-[7.5px] sm:text-[8px] font-mono uppercase tracking-[0.28em] text-[#DFAB5F]/80 leading-tight">
-                  Varanasi Heritage
+                <span className="text-[7.5px] sm:text-[8px] font-mono uppercase tracking-[0.32em] text-[#DFAB5F]/85 leading-tight flex items-center gap-1">
+                  <span>Varanasi Heritage</span>
+                  <span className="w-1 h-1 rounded-full bg-[#DFAB5F] inline-block" />
+                  <span>1998</span>
                 </span>
               </div>
-            </motion.a>
+            </Link>
 
-            {/* 6 & 7. Desktop Navigation Links with Active Detection & Center-Outward Underline */}
-            <div className="hidden lg:flex items-center gap-1 xl:gap-2 z-10">
+            {/* Desktop Navigation Links with Spring Active Pill */}
+            <div className="hidden lg:flex items-center gap-1 xl:gap-1.5 z-10">
               {navLinks.map((link) => {
                 const isActive = activeSection === link.name;
                 const isHovered = hoveredLink === link.name;
 
                 return (
-                  <a
+                  <Link
                     key={link.name}
                     href={link.href}
                     onMouseEnter={() => setHoveredLink(link.name)}
                     onMouseLeave={() => setHoveredLink(null)}
-                    className="relative px-3.5 py-1.5 rounded-full text-[11px] font-mono uppercase tracking-[0.18em] transition-colors group"
+                    className="relative px-3.5 py-1.5 rounded-full text-[11px] font-mono uppercase tracking-[0.2em] transition-colors group"
                   >
-                    {/* Active Section Rounded Pill Indicator */}
+                    {/* Active Section Rounded Pill Indicator with Inner Glow */}
                     {isActive && (
                       <motion.div
                         layoutId="nav-active-pill"
-                        className="absolute inset-0 rounded-full bg-[#1E130D]/80 border border-[#C69247]/35 shadow-inner"
-                        transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        className="absolute inset-0 rounded-full bg-gradient-to-r from-[#241710] via-[#1E130D] to-[#241710] border border-[#DFAB5F]/60 shadow-[0_0_15px_rgba(198,146,71,0.22),inset_0_1px_2px_rgba(255,255,255,0.1)]"
+                        transition={{ type: "spring", stiffness: 400, damping: 32 }}
                       />
                     )}
 
                     {/* Navigation Link Text */}
                     <span
-                      className={`relative z-10 transition-colors duration-250 ${
-                        isActive || isHovered ? "text-[#DFAB5F]" : "text-[#FBF6EE]/80"
+                      className={`relative z-10 transition-colors duration-250 flex items-center gap-1.5 font-medium ${
+                        isActive
+                          ? "text-[#DFAB5F] font-semibold drop-shadow-[0_0_8px_rgba(223,171,95,0.4)]"
+                          : isHovered
+                          ? "text-[#DFAB5F]"
+                          : "text-[#FBF6EE]/75"
                       }`}
                     >
-                      {link.name}
+                      {isActive && (
+                        <span className="w-1 h-1 rounded-full bg-[#DFAB5F] shadow-[0_0_6px_#DFAB5F] inline-block" />
+                      )}
+                      <span>{link.name}</span>
                     </span>
 
                     {/* Center-Outward Growing Thin Gold Underline on Hover */}
                     <span
-                      className={`absolute bottom-0.5 left-3 right-3 h-[1px] bg-gradient-to-r from-transparent via-[#DFAB5F] to-transparent origin-center transition-transform duration-300 ease-out z-10 ${
+                      className={`absolute bottom-0 left-3 right-3 h-[1px] bg-gradient-to-r from-transparent via-[#DFAB5F] to-transparent origin-center transition-transform duration-300 ease-out z-10 ${
                         isHovered && !isActive ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0"
                       }`}
                     />
-                  </a>
+                  </Link>
                 );
               })}
             </div>
 
-            {/* 8. Visit Adda Button with Lift, Shimmer Sweep, and Arrow Glide */}
+            {/* Visit Adda Gold Pill CTA Button */}
             <div className="hidden sm:flex items-center shrink-0 z-10">
-              <motion.a
-                whileHover={shouldReduceMotion ? undefined : { scale: 1.03, y: -1.5 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.35, ease: cinematicEase }}
-                href="#visit"
-                className="relative inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full bg-gradient-to-r from-[#DFAB5F] via-[#C69247] to-[#DFAB5F] text-[#0D0806] font-bold text-[11px] sm:text-xs uppercase tracking-[0.18em] transition-all duration-300 shadow-md shadow-[#C69247]/25 hover:shadow-[0_0_20px_rgba(223,171,95,0.4)] group overflow-hidden cursor-pointer"
+              <Link
+                href="/contact"
+                className="relative inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full bg-gradient-to-r from-[#DFAB5F] via-[#C69247] to-[#DFAB5F] text-[#0D0806] font-bold text-[11px] sm:text-xs uppercase tracking-[0.2em] transition-all duration-300 shadow-[0_4px_20px_rgba(198,146,71,0.3)] hover:shadow-[0_0_25px_rgba(223,171,95,0.55)] hover:scale-[1.04] active:scale-[0.96] group overflow-hidden cursor-pointer"
               >
-                {/* Soft Inner Highlight Sweep from Left to Right */}
-                <span className="absolute inset-0 w-1/2 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-700 ease-out pointer-events-none" />
+                {/* Continuous Shimmer Light Sweep */}
+                <span className="absolute inset-0 w-1/2 bg-white/25 transform -skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-700 ease-out pointer-events-none" />
 
-                <span className="relative z-10">Visit Adda</span>
-                <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1 relative z-10" />
-              </motion.a>
+                <Sparkles className="w-3 h-3 text-[#0D0806] opacity-80 group-hover:rotate-12 transition-transform" />
+                <span className="relative z-10 font-black">Visit Adda</span>
+                <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 relative z-10" />
+              </Link>
             </div>
 
             {/* Mobile Toggle Button */}
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-full border border-[#C69247]/30 text-[#FBF6EE] hover:text-[#DFAB5F] bg-[#1E130D] z-10"
+              className="lg:hidden p-2.5 rounded-full border border-[#C69247]/40 text-[#FBF6EE] hover:text-[#DFAB5F] bg-[#1E130D] z-10 transition-colors shadow-sm"
               aria-label="Toggle Navigation Menu"
             >
-              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              {mobileMenuOpen ? <X className="w-4 h-4 text-[#DFAB5F]" /> : <Menu className="w-4 h-4" />}
             </motion.button>
           </nav>
         </motion.div>
       </div>
 
-      {/* 10. Mobile Glassmorphic Drawer with Smooth Downward Reveal */}
+      {/* Mobile Glassmorphic Drawer with Smooth Downward Reveal */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            initial={{ opacity: 0, y: -10, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            exit={{ opacity: 0, y: -10, scale: 0.97 }}
             transition={{ duration: 0.35, ease: cinematicEase }}
-            className="lg:hidden mt-2 mx-auto max-w-lg rounded-3xl bg-[#140C08]/95 border border-[#C69247]/35 backdrop-blur-2xl overflow-hidden shadow-2xl p-5 space-y-3 pointer-events-auto"
+            className="lg:hidden mt-2.5 mx-auto max-w-lg rounded-3xl bg-[#140C08]/96 border border-[#C69247]/40 backdrop-blur-2xl overflow-hidden shadow-[0_25px_50px_rgba(0,0,0,0.9),0_0_30px_rgba(198,146,71,0.15)] p-5 space-y-3.5 pointer-events-auto"
           >
-            <div className="space-y-1 pb-2">
+            <div className="space-y-1 pb-1">
               {navLinks.map((link) => {
                 const isActive = activeSection === link.name;
                 return (
-                  <a
+                  <Link
                     key={link.name}
                     href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`block px-3.5 py-2 rounded-xl text-xs uppercase tracking-[0.2em] font-medium transition-colors ${
+                    className={`block px-4 py-2.5 rounded-2xl text-xs uppercase tracking-[0.2em] font-medium transition-all ${
                       isActive
-                        ? "text-[#DFAB5F] bg-[#1E130D] border border-[#C69247]/30"
-                        : "text-[#FBF6EE]/90 hover:text-[#DFAB5F] hover:bg-[#1E130D]"
+                        ? "text-[#DFAB5F] bg-[#1E130D] border border-[#C69247]/40 font-semibold shadow-inner"
+                        : "text-[#FBF6EE]/85 hover:text-[#DFAB5F] hover:bg-[#1E130D]/70"
                     }`}
                   >
-                    {link.name}
-                  </a>
+                    <div className="flex items-center justify-between">
+                      <span>{link.name}</span>
+                      {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#DFAB5F] animate-pulse" />}
+                    </div>
+                  </Link>
                 );
               })}
             </div>
 
-            <div className="pt-2 border-t border-[#C69247]/20 flex flex-col gap-2">
-              <a
-                href="#visit"
+            <div className="pt-2.5 border-t border-[#C69247]/25 flex flex-col gap-2">
+              <Link
+                href="/contact"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full py-2.5 rounded-full bg-gradient-to-r from-[#DFAB5F] to-[#C69247] text-[#0D0806] font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-lg"
+                className="w-full py-3 rounded-full bg-gradient-to-r from-[#DFAB5F] to-[#C69247] text-[#0D0806] font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg hover:brightness-110 active:scale-98 transition-all"
               >
                 <span>Visit The Adda</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
-              </a>
+              </Link>
             </div>
           </motion.div>
         )}
