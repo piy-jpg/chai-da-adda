@@ -1,123 +1,161 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Volume2, VolumeX, RotateCcw } from "lucide-react";
+import { audioEngine } from "@/lib/audioEngine";
+
+const WELCOME_GREETING_TEXT =
+  "Welcome to Chai Da Adda! Experience the warmth of authentic Indian kulhad chai, hand-poured with roasted spices, ginger, and love. Scroll down to discover our signature blends and stories.";
+
+const SESSION_STORAGE_KEY = "chai_greeted_home";
 
 export function VoiceGreeting() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [voiceLabel, setVoiceLabel] = useState<string>("Chai Da Adda Voice");
+  const audioFallbackRef = useRef<HTMLAudioElement | null>(null);
   const shouldReduceMotion = useReducedMotion();
+  const hasTriggeredRef = useRef(false);
+
+  // Stop all speech & audio playback
+  const stopAll = useCallback(() => {
+    audioEngine.stop();
+    if (audioFallbackRef.current) {
+      audioFallbackRef.current.pause();
+      audioFallbackRef.current.currentTime = 0;
+    }
+    setIsPlaying(false);
+  }, []);
+
+  // Speak welcome message using TTS engine with audio file fallback
+  const triggerWelcomeVoice = useCallback((isManual = false) => {
+    if (isPlaying) {
+      stopAll();
+      return;
+    }
+
+    // If auto-triggering, check if already spoken this session
+    if (!isManual && audioEngine.hasSpokenThisSession(SESSION_STORAGE_KEY)) {
+      return;
+    }
+
+    // Mark as played for session
+    audioEngine.markSpokenThisSession(SESSION_STORAGE_KEY);
+    hasTriggeredRef.current = true;
+    setHasPlayed(true);
+
+    // Initialize TTS voices
+    audioEngine.initVoices().then((voices) => {
+      const best = audioEngine.getBestVoice("en-IN");
+      if (best) {
+        setVoiceLabel(best.name.replace(/Google|Microsoft|Apple|Natural/gi, "").trim() || "Natural Voice");
+      }
+    });
+
+    const spoken = audioEngine.speak({
+      text: WELCOME_GREETING_TEXT,
+      rate: 0.94,
+      pitch: 1.02,
+      lang: "en-IN",
+      onStart: () => {
+        setIsPlaying(true);
+      },
+      onEnd: () => {
+        setIsPlaying(false);
+      },
+      onError: () => {
+        // Fallback to recorded audio if TTS fails or is blocked
+        const audio = audioFallbackRef.current;
+        if (audio) {
+          audio.currentTime = 0;
+          audio
+            .play()
+            .then(() => setIsPlaying(true))
+            .catch(() => setIsPlaying(false));
+        } else {
+          setIsPlaying(false);
+        }
+      },
+    });
+
+    if (!spoken) {
+      // Direct fallback
+      const audio = audioFallbackRef.current;
+      if (audio) {
+        audio.currentTime = 0;
+        audio
+          .play()
+          .then(() => setIsPlaying(true))
+          .catch(() => setIsPlaying(false));
+      }
+    }
+  }, [isPlaying, stopAll]);
 
   useEffect(() => {
     setMounted(true);
 
-    // Initialize audio instance
+    // Prepare backup audio
     const audio = new Audio("/audio/welcome-voice.mp3");
     audio.preload = "auto";
-    audio.volume = 1.0;
-    audioRef.current = audio;
+    audioFallbackRef.current = audio;
 
-    audio.onplay = () => {
-      setIsPlaying(true);
+    audio.onended = () => setIsPlaying(false);
+    audio.onpause = () => setIsPlaying(false);
+    audio.onerror = () => setIsPlaying(false);
+
+    // Check if previously greeted
+    const alreadyGreeted = audioEngine.hasSpokenThisSession(SESSION_STORAGE_KEY);
+    if (alreadyGreeted) {
       setHasPlayed(true);
-    };
+    }
 
-    audio.onended = () => {
-      setIsPlaying(false);
-    };
-
-    audio.onpause = () => {
-      setIsPlaying(false);
-    };
-
-    audio.onerror = () => {
-      setIsPlaying(false);
-    };
-
-    // Auto-trigger function
-    let started = false;
-    const playGreeting = () => {
-      if (started) return;
+    // Listen for user scroll or interaction on home page to auto-speak
+    const handleScrollOrInteract = () => {
+      if (hasTriggeredRef.current) return;
       
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            started = true;
-            setIsPlaying(true);
-            setHasPlayed(true);
-            removeInteractionListeners();
-          })
-          .catch(() => {
-            // Browser strictly required a user gesture: listeners below will auto-trigger on first touch/click/scroll
-          });
+      // Check if user has started scrolling or gesturing
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      if (scrollY > 10 || true) {
+        if (!audioEngine.hasSpokenThisSession(SESSION_STORAGE_KEY)) {
+          triggerWelcomeVoice(false);
+        }
+        removeScrollListeners();
       }
     };
 
-    const handleFirstGesture = () => {
-      if (!started) {
-        playGreeting();
-      }
+    const addScrollListeners = () => {
+      const options: AddEventListenerOptions = { capture: true, passive: true };
+      window.addEventListener("scroll", handleScrollOrInteract, options);
+      window.addEventListener("wheel", handleScrollOrInteract, options);
+      window.addEventListener("touchmove", handleScrollOrInteract, options);
+      document.addEventListener("pointerdown", handleScrollOrInteract, options);
     };
 
-    const addInteractionListeners = () => {
-      const options: AddEventListenerOptions = { capture: true, passive: true, once: true };
-      document.addEventListener("pointerdown", handleFirstGesture, options);
-      document.addEventListener("touchstart", handleFirstGesture, options);
-      document.addEventListener("click", handleFirstGesture, options);
-      document.addEventListener("scroll", handleFirstGesture, options);
-      document.addEventListener("keydown", handleFirstGesture, options);
-      document.addEventListener("wheel", handleFirstGesture, options);
-      window.addEventListener("scroll", handleFirstGesture, options);
+    const removeScrollListeners = () => {
+      window.removeEventListener("scroll", handleScrollOrInteract);
+      window.removeEventListener("wheel", handleScrollOrInteract);
+      window.removeEventListener("touchmove", handleScrollOrInteract);
+      document.removeEventListener("pointerdown", handleScrollOrInteract);
     };
 
-    const removeInteractionListeners = () => {
-      document.removeEventListener("pointerdown", handleFirstGesture);
-      document.removeEventListener("touchstart", handleFirstGesture);
-      document.removeEventListener("click", handleFirstGesture);
-      document.removeEventListener("scroll", handleFirstGesture);
-      document.removeEventListener("keydown", handleFirstGesture);
-      document.removeEventListener("wheel", handleFirstGesture);
-      window.removeEventListener("scroll", handleFirstGesture);
-    };
-
-    // 1. Immediately try to play upon site open
-    playGreeting();
-
-    // 2. Also attach capture listeners so any touch/scroll/click immediately starts it
-    addInteractionListeners();
-
-    // 3. Retry shortly after DOM settles
-    const timer = setTimeout(playGreeting, 500);
+    if (!alreadyGreeted) {
+      addScrollListeners();
+    }
 
     return () => {
-      clearTimeout(timer);
-      removeInteractionListeners();
-      audio.pause();
+      removeScrollListeners();
+      stopAll();
     };
-  }, []);
+  }, [triggerWelcomeVoice, stopAll]);
 
   const handleTogglePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const audio = audioRef.current;
-    if (!audio) return;
-
     if (isPlaying) {
-      audio.pause();
-      audio.currentTime = 0;
-      setIsPlaying(false);
+      stopAll();
     } else {
-      audio.currentTime = 0;
-      audio
-        .play()
-        .then(() => {
-          setIsPlaying(true);
-          setHasPlayed(true);
-        })
-        .catch(() => {});
+      triggerWelcomeVoice(true);
     }
   };
 
@@ -134,16 +172,16 @@ export function VoiceGreeting() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className={`flex items-center gap-3 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full transition-all duration-300 backdrop-blur-2xl border shadow-2xl group ${
           isPlaying
-            ? "bg-[#140C08]/96 border-[#DFAB5F]/80 shadow-[0_15px_40px_rgba(0,0,0,0.95),0_0_28px_rgba(223,171,95,0.4)]"
-            : "bg-[#120B08]/92 border-[#C69247]/40 hover:border-[#DFAB5F]/60 shadow-[0_10px_30px_rgba(0,0,0,0.8),0_0_15px_rgba(198,146,71,0.12)]"
+            ? "bg-[#140C08]/96 border-[#DFAB5F]/90 shadow-[0_15px_40px_rgba(0,0,0,0.95),0_0_28px_rgba(223,171,95,0.45)]"
+            : "bg-[#120B08]/92 border-[#C69247]/40 hover:border-[#DFAB5F]/70 shadow-[0_10px_30px_rgba(0,0,0,0.8),0_0_15px_rgba(198,146,71,0.15)]"
         }`}
       >
         {/* Interactive Gold Speaker Icon Button */}
         <button
           onClick={handleTogglePlay}
           className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-[#DFAB5F] via-[#F3CE85] to-[#C69247] text-[#0D0806] flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer shrink-0"
-          title={isPlaying ? "Mute Welcome Greeting" : "Replay Welcome Greeting"}
-          aria-label={isPlaying ? "Mute Welcome Greeting" : "Replay Welcome Greeting"}
+          title={isPlaying ? "Mute Welcome Greeting" : "Play Chai Da Adda Voice"}
+          aria-label={isPlaying ? "Mute Welcome Greeting" : "Play Chai Da Adda Voice"}
         >
           {isPlaying ? (
             <VolumeX className="w-4 h-4 stroke-[2.5]" />
@@ -158,7 +196,7 @@ export function VoiceGreeting() {
         <div onClick={handleTogglePlay} className="flex flex-col cursor-pointer pr-1">
           <div className="flex items-center gap-2">
             <span className="text-xs sm:text-[13px] font-serif font-bold text-[#FBF6EE] group-hover:text-[#DFAB5F] transition-colors leading-tight">
-              {isPlaying ? "“Hey, chai lovers!”" : "Chai Da Adda Voice"}
+              {isPlaying ? "“Welcome to Chai Da Adda!”" : "Chai Da Adda Voice"}
             </span>
 
             {/* Animated Equalizer Waveform while speaking */}
@@ -173,7 +211,7 @@ export function VoiceGreeting() {
           </div>
 
           <span className="text-[8.5px] sm:text-[9.5px] font-mono text-[#DFAB5F]/90 uppercase tracking-widest leading-tight mt-0.5">
-            {isPlaying ? "Playing Live • Tap to Mute" : "Tap to Play / Replay"}
+            {isPlaying ? "Speaking Live • Tap to Mute" : hasPlayed ? "Tap to Replay Voice" : "Scroll to Listen"}
           </span>
         </div>
       </motion.div>
