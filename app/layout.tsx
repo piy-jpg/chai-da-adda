@@ -98,14 +98,13 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${cinzel.variable} ${jakarta.variable}`}
+      suppressHydrationWarning
     >
-      <head>
+      <body className="min-h-screen bg-[#0D0806] text-[#FBF6EE] font-sans antialiased overflow-x-hidden selection:bg-[#C69247] selection:text-[#0D0806]">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-      </head>
-      <body className="min-h-screen bg-[#0D0806] text-[#FBF6EE] font-sans antialiased overflow-x-hidden selection:bg-[#C69247] selection:text-[#0D0806]">
         <SmoothScroll>{children}</SmoothScroll>
         <FloatingContact />
       </body>

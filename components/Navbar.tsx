@@ -34,9 +34,11 @@ export function Navbar() {
   const shouldReduceMotion = useReducedMotion();
 
   // Live IST Open Status (6:00 AM - 2:00 AM)
+  const [mounted, setMounted] = useState(false);
   const [isOpenNow, setIsOpenNow] = useState(true);
 
   useEffect(() => {
+    setMounted(true);
     const checkOpenStatus = () => {
       const now = new Date();
       const utc = now.getTime() + now.getTimezoneOffset() * 60000;
@@ -278,12 +280,12 @@ export function Navbar() {
               <div className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1E130D]/90 border border-[#C69247]/30 text-[10px] font-mono text-[#DFAB5F]">
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    isOpenNow
+                    !mounted || isOpenNow
                       ? "bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"
                       : "bg-amber-400"
                   }`}
                 />
-                <span>{isOpenNow ? "Open Now • 6 AM–2 AM" : "Opens at 6 AM"}</span>
+                <span>{!mounted || isOpenNow ? "Open Now • 6 AM–2 AM" : "Opens at 6 AM"}</span>
               </div>
 
               <Link
@@ -327,13 +329,13 @@ export function Navbar() {
               <div className="flex items-center gap-1.5">
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    isOpenNow
+                    !mounted || isOpenNow
                       ? "bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"
                       : "bg-amber-400"
                   }`}
                 />
                 <span className="text-[11px] font-mono text-[#DFAB5F]">
-                  {isOpenNow ? "Open Now • Fresh Dum Brewing" : "Opens at 6:00 AM Daily"}
+                  {!mounted || isOpenNow ? "Open Now • Fresh Dum Brewing" : "Opens at 6:00 AM Daily"}
                 </span>
               </div>
               <span className="text-[10px] font-mono text-[#D8CCC0]/60">Varanasi, UP</span>
