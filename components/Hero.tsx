@@ -2,8 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowDown, Sparkles, Coffee, ArrowUpRight, Flame, Clock } from "lucide-react";
+import { ArrowDown, Sparkles, Coffee, ArrowUpRight, Flame, Clock, Volume2 } from "lucide-react";
 
 /** Real-time 3D Particle, Spice, Tea-Leaf, & Dotted Atmosphere Canvas for Hero */
 function Hero3DCanvas() {
@@ -307,6 +306,29 @@ export function Hero() {
   const [isMobile, setIsMobile] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
+  const [isPlayingVoice, setIsPlayingVoice] = useState(false);
+  const audioGreetingRef = useRef<HTMLAudioElement | null>(null);
+
+  const toggleAudioGreeting = () => {
+    if (!audioGreetingRef.current) {
+      audioGreetingRef.current = new Audio("/audio/chai-da-adda-welcome.mp3");
+      audioGreetingRef.current.onended = () => setIsPlayingVoice(false);
+      audioGreetingRef.current.onpause = () => setIsPlayingVoice(false);
+    }
+
+    const audio = audioGreetingRef.current;
+    if (isPlayingVoice) {
+      audio.pause();
+      audio.currentTime = 0;
+      setIsPlayingVoice(false);
+    } else {
+      audio.play().then(() => {
+        setIsPlayingVoice(true);
+      }).catch(() => {
+        setIsPlayingVoice(false);
+      });
+    }
+  };
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -473,9 +495,33 @@ export function Hero() {
           </h1>
 
           {/* Description */}
-          <p className="text-xs sm:text-lg md:text-xl text-[#E0D4C8] font-sans font-light max-w-2xl mx-auto leading-relaxed mb-5 sm:mb-7">
+          <p className="text-xs sm:text-lg md:text-xl text-[#E0D4C8] font-sans font-light max-w-2xl mx-auto leading-relaxed mb-4 sm:mb-6">
             Authentic Indian chai, crafted with warmth, tradition and a modern soul.
           </p>
+
+          {/* Interactive Voice Greeting Button */}
+          <button
+            onClick={toggleAudioGreeting}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#DFAB5F]/40 bg-[#1E130D]/90 hover:bg-[#2A1A12] text-[#DFAB5F] text-xs font-mono tracking-wider transition-all duration-300 shadow-[0_4px_15px_rgba(0,0,0,0.6)] hover:border-[#DFAB5F] hover:scale-105 active:scale-95 cursor-pointer group"
+            title="Listen to Chai Da Adda voice greeting"
+          >
+            {isPlayingVoice ? (
+              <>
+                <Volume2 className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                <span className="text-[#FBF6EE] font-sans font-medium text-xs">“Hey, chai lovers! Come hang out at Chai Da Adda!”</span>
+                <span className="flex gap-0.5 items-end h-3">
+                  <span className="w-0.5 h-2.5 bg-[#DFAB5F] animate-bounce" style={{ animationDelay: "0.1s" }} />
+                  <span className="w-0.5 h-3.5 bg-[#DFAB5F] animate-bounce" style={{ animationDelay: "0.2s" }} />
+                  <span className="w-0.5 h-2 bg-[#DFAB5F] animate-bounce" style={{ animationDelay: "0.3s" }} />
+                </span>
+              </>
+            ) : (
+              <>
+                <Volume2 className="w-3.5 h-3.5 text-[#DFAB5F] group-hover:scale-110 transition-transform" />
+                <span>Hear Voice Greeting 🔊</span>
+              </>
+            )}
+          </button>
         </div>
 
         {/* ================= STAGE 2: 33% to 68% (The Slow Boiling Craft) ================= */}
