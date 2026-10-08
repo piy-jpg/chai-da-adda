@@ -184,7 +184,7 @@ export function VoiceGreeting() {
         <div onClick={handleTogglePlay} className="flex flex-col cursor-pointer pr-1">
           <div className="flex items-center gap-2">
             <span className="text-xs sm:text-[13px] font-serif font-bold text-[#FBF6EE] group-hover:text-[#DFAB5F] transition-colors leading-tight">
-              {isPlaying ? "“Hey, chai lovers!”" : "Chai Da Adda Voice"}
+              {isPlaying ? "“Hey, chai lovers!”" : "Welcome Voice"}
             </span>
 
             {/* Animated Equalizer Waveform while speaking */}
@@ -198,8 +198,8 @@ export function VoiceGreeting() {
             )}
           </div>
 
-          <span className="text-[8.5px] sm:text-[9.5px] font-mono text-[#DFAB5F]/90 uppercase tracking-widest leading-tight mt-0.5">
-            {isPlaying ? "Playing Live • Tap to Mute" : hasPlayed ? "Tap to Replay Voice" : "Tap Anywhere to Hear Voice"}
+          <span className="text-[9px] sm:text-[10px] font-mono text-[#DFAB5F]/90 uppercase tracking-wider leading-tight mt-0.5">
+            {isPlaying ? "Tap to Mute" : hasPlayed ? "Tap to Replay" : "Tap to Play"}
           </span>
         </div>
       </motion.div>
