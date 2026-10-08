@@ -6,7 +6,6 @@ import { Volume2, VolumeX, RotateCcw, Sparkles } from "lucide-react";
 
 export function VoiceGreeting() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const [hasCompletedOnce, setHasCompletedOnce] = useState(false);
   const [mounted, setMounted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -22,7 +21,6 @@ export function VoiceGreeting() {
 
     audio.onplay = () => {
       setIsPlaying(true);
-      setAutoplayBlocked(false);
     };
 
     audio.onended = () => {
@@ -54,33 +52,51 @@ export function VoiceGreeting() {
       };
     }
 
-    // Attempt automatic playback once on website open
-    const attemptAutoplay = () => {
-      // Small pause to allow page mount
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            // Autoplay succeeded
-            setIsPlaying(true);
-            setAutoplayBlocked(false);
-            try {
-              sessionStorage.setItem("cda_welcome_played", "true");
-            } catch {}
-          })
-          .catch(() => {
-            // Browser autoplay policy blocked unsolicited audio:
-            // Display the elegant "Tap to hear your welcome" prompt
-            setAutoplayBlocked(true);
-            setIsPlaying(false);
-          });
-      }
+    // Auto-start function
+    const startAudio = () => {
+      audio
+        .play()
+        .then(() => {
+          setIsPlaying(true);
+          try {
+            sessionStorage.setItem("cda_welcome_played", "true");
+          } catch {}
+          cleanupAutoListeners();
+        })
+        .catch(() => {
+          // If browser restricts unprompted audio, register early auto-triggers
+          attachAutoListeners();
+        });
     };
 
-    const timer = setTimeout(attemptAutoplay, 600);
+    const onUserInteraction = () => {
+      startAudio();
+    };
+
+    const attachAutoListeners = () => {
+      window.addEventListener("pointerdown", onUserInteraction, { once: true, passive: true });
+      window.addEventListener("touchstart", onUserInteraction, { once: true, passive: true });
+      window.addEventListener("scroll", onUserInteraction, { once: true, passive: true });
+      window.addEventListener("click", onUserInteraction, { once: true, passive: true });
+      window.addEventListener("keydown", onUserInteraction, { once: true, passive: true });
+      window.addEventListener("wheel", onUserInteraction, { once: true, passive: true });
+    };
+
+    const cleanupAutoListeners = () => {
+      window.removeEventListener("pointerdown", onUserInteraction);
+      window.removeEventListener("touchstart", onUserInteraction);
+      window.removeEventListener("scroll", onUserInteraction);
+      window.removeEventListener("click", onUserInteraction);
+      window.removeEventListener("keydown", onUserInteraction);
+      window.removeEventListener("wheel", onUserInteraction);
+    };
+
+    // Attempt automatic playback immediately on site open
+    const timer = setTimeout(startAudio, 400);
 
     return () => {
       clearTimeout(timer);
+      cleanupAutoListeners();
       audio.pause();
     };
   }, []);
@@ -100,7 +116,6 @@ export function VoiceGreeting() {
         .play()
         .then(() => {
           setIsPlaying(true);
-          setAutoplayBlocked(false);
           try {
             sessionStorage.setItem("cda_welcome_played", "true");
           } catch {}
@@ -121,38 +136,24 @@ export function VoiceGreeting() {
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className={`flex items-center gap-3 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full transition-all duration-300 backdrop-blur-2xl border shadow-2xl group ${
-          autoplayBlocked
-            ? "bg-[#180E09]/96 border-[#DFAB5F]/60 shadow-[0_15px_40px_rgba(0,0,0,0.9),0_0_25px_rgba(223,171,95,0.3)] animate-pulse"
-            : isPlaying
-            ? "bg-[#140C08]/96 border-[#DFAB5F]/70 shadow-[0_15px_40px_rgba(0,0,0,0.9),0_0_25px_rgba(223,171,95,0.35)]"
-            : "bg-[#120B08]/90 border-[#C69247]/35 hover:border-[#DFAB5F]/60 shadow-[0_10px_30px_rgba(0,0,0,0.8),0_0_15px_rgba(198,146,71,0.12)]"
+          isPlaying
+            ? "bg-[#140C08]/96 border-[#DFAB5F]/75 shadow-[0_15px_40px_rgba(0,0,0,0.95),0_0_28px_rgba(223,171,95,0.4)]"
+            : "bg-[#120B08]/92 border-[#C69247]/40 hover:border-[#DFAB5F]/60 shadow-[0_10px_30px_rgba(0,0,0,0.8),0_0_15px_rgba(198,146,71,0.12)]"
         }`}
       >
         {/* Interactive Gold Speaker Icon Button */}
         <button
           onClick={handlePlayOrReplay}
           className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-[#DFAB5F] via-[#F3CE85] to-[#C69247] text-[#0D0806] flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer shrink-0"
-          title={
-            autoplayBlocked
-              ? "Tap to hear your welcome"
-              : isPlaying
-              ? "Mute Welcome Greeting"
-              : "Replay Welcome Greeting"
-          }
-          aria-label={
-            autoplayBlocked
-              ? "Tap to hear your welcome"
-              : isPlaying
-              ? "Mute Welcome Greeting"
-              : "Replay Welcome Greeting"
-          }
+          title={isPlaying ? "Mute Welcome Greeting" : "Replay Welcome Greeting"}
+          aria-label={isPlaying ? "Mute Welcome Greeting" : "Replay Welcome Greeting"}
         >
           {isPlaying ? (
             <VolumeX className="w-4 h-4 stroke-[2.5]" />
-          ) : hasCompletedOnce && !autoplayBlocked ? (
+          ) : hasCompletedOnce ? (
             <RotateCcw className="w-3.5 h-3.5 stroke-[2.5]" />
           ) : (
-            <Volume2 className="w-4 h-4 stroke-[2.5] animate-bounce" style={{ animationDuration: "1.2s" }} />
+            <Volume2 className="w-4 h-4 stroke-[2.5] animate-pulse" />
           )}
         </button>
 
@@ -160,11 +161,7 @@ export function VoiceGreeting() {
         <div onClick={handlePlayOrReplay} className="flex flex-col cursor-pointer pr-1">
           <div className="flex items-center gap-2">
             <span className="text-xs sm:text-[13px] font-serif font-bold text-[#FBF6EE] group-hover:text-[#DFAB5F] transition-colors leading-tight">
-              {autoplayBlocked
-                ? "Tap to hear your welcome"
-                : isPlaying
-                ? "“Hey, chai lovers!”"
-                : "Welcome Greeting"}
+              {isPlaying ? "“Hey, chai lovers!”" : "Chai Da Adda Voice"}
             </span>
 
             {/* Animated Equalizer Waveform while speaking */}
@@ -179,11 +176,7 @@ export function VoiceGreeting() {
           </div>
 
           <span className="text-[8.5px] sm:text-[9.5px] font-mono text-[#DFAB5F]/90 uppercase tracking-widest leading-tight mt-0.5">
-            {autoplayBlocked
-              ? "Warm Indian Voice Note • Tap to Listen"
-              : isPlaying
-              ? "Playing • Tap to Mute"
-              : "Tap to Replay Voice Note"}
+            {isPlaying ? "Playing Live • Tap to Mute" : "Tap to Replay Greeting"}
           </span>
         </div>
       </motion.div>
