@@ -320,7 +320,42 @@ export function Hero() {
     if (!video || !container) return;
 
     let triggerInstance: ScrollTrigger | null = null;
-    let proxy = { currentTime: 0 };
+    let targetTime = 0;
+    let renderedTime = 0;
+    let isSeeking = false;
+    let rafId: number;
+
+    const onSeeked = () => {
+      isSeeking = false;
+    };
+
+    video.addEventListener("seeked", onSeeked);
+
+    // Continuous non-blocking RAF loop for silky-smooth hardware-accelerated video frames
+    const renderVideoLoop = () => {
+      if (video && !isNaN(targetTime)) {
+        const diff = targetTime - renderedTime;
+        if (Math.abs(diff) > 0.008) {
+          renderedTime += diff * (isMobileDevice ? 0.28 : 0.45);
+
+          if (!isSeeking && !video.seeking) {
+            isSeeking = true;
+            try {
+              if (typeof (video as any).fastSeek === "function") {
+                (video as any).fastSeek(renderedTime);
+              } else {
+                video.currentTime = renderedTime;
+              }
+            } catch {
+              isSeeking = false;
+            }
+          }
+        }
+      }
+      rafId = requestAnimationFrame(renderVideoLoop);
+    };
+
+    rafId = requestAnimationFrame(renderVideoLoop);
 
     const setupTimeline = () => {
       const duration = video.duration || 10;
@@ -333,37 +368,26 @@ export function Hero() {
       // Ensure video is paused at initial load on all devices
       video.pause();
       video.currentTime = 0;
+      targetTime = 0;
+      renderedTime = 0;
 
-      const scrollDistance = isMobileDevice ? 2000 : 2800;
+      const scrollDistance = isMobileDevice ? 2200 : 2800;
 
-      // Scrub video frame-by-frame on all devices
+      // Scrub timeline driving narrative stages, background scale, and video targetTime
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: container,
           start: "top top",
           end: `+=${scrollDistance}`,
           pin: true,
-          scrub: 0.8,
+          scrub: 0.6,
           anticipatePin: 1,
           onUpdate: (self) => {
+            targetTime = self.progress * duration;
             setScrollProgress(self.progress);
           },
         },
       });
-
-      tl.to(
-        proxy,
-        {
-          currentTime: duration,
-          ease: "none",
-          onUpdate: () => {
-            if (video && !isNaN(proxy.currentTime)) {
-              video.currentTime = proxy.currentTime;
-            }
-          },
-        },
-        0
-      );
 
       tl.to(
         video,
@@ -385,6 +409,8 @@ export function Hero() {
     }
 
     return () => {
+      cancelAnimationFrame(rafId);
+      video.removeEventListener("seeked", onSeeked);
       video.removeEventListener("loadedmetadata", setupTimeline);
       video.removeEventListener("canplay", setupTimeline);
       if (triggerInstance) {
