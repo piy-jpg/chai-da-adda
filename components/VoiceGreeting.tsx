@@ -34,7 +34,7 @@ export function VoiceGreeting() {
           isUnlockedRef.current = true;
         })
         .catch((err) => {
-          console.debug("[VoiceGreeting] Playback waiting for user gesture:", err?.message || err);
+          console.debug("[VoiceGreeting] Autoplay blocked by browser policy:", err?.message || err);
           setIsPlaying(false);
         });
     }
@@ -67,7 +67,7 @@ export function VoiceGreeting() {
   useEffect(() => {
     setMounted(true);
 
-    // Create and initialize audio element
+    // Create and preload audio element
     const audio = new Audio(AUDIO_SRC);
     audio.preload = "auto";
     audioRef.current = audio;
@@ -85,24 +85,27 @@ export function VoiceGreeting() {
     audio.addEventListener("pause", onPause);
     audio.addEventListener("error", onError);
 
-    // 1. Attempt immediate zero-click playback on visit
-    const initialPlayPromise = audio.play();
-    if (initialPlayPromise !== undefined) {
-      initialPlayPromise
-        .then(() => {
-          setIsPlaying(true);
-          setHasPlayed(true);
-          isUnlockedRef.current = true;
-        })
-        .catch(() => {
-          // Autoplay was blocked by the browser policy.
-          // Setup user gesture listeners for guaranteed 1st tap/click unlock.
-        });
-    }
+    // 1. Immediate 0ms attempt when website opens
+    const attemptImmediateAutoplay = () => {
+      audio.currentTime = 0;
+      const initialPlayPromise = audio.play();
+      if (initialPlayPromise !== undefined) {
+        initialPlayPromise
+          .then(() => {
+            setIsPlaying(true);
+            setHasPlayed(true);
+            isUnlockedRef.current = true;
+            cleanupGestureListeners();
+          })
+          .catch(() => {
+            // Autoplay policy waiting for user activation
+          });
+      }
+    };
 
-    // 2. Browser-compliant user gesture unlock
-    // Note: Chrome/Safari ONLY count pointerdown, touchstart, click, and keydown as user gestures.
-    // Pure wheel/scroll events are not considered transient activation by browser security.
+    attemptImmediateAutoplay();
+
+    // 2. User interaction unlock (if browser restricted 0-click on cold visit)
     const handleUserGesture = () => {
       if (isUnlockedRef.current) return;
 
@@ -116,9 +119,7 @@ export function VoiceGreeting() {
             setHasPlayed(true);
             cleanupGestureListeners();
           })
-          .catch(() => {
-            // Keep listeners alive if still locked
-          });
+          .catch(() => {});
       }
     };
 
