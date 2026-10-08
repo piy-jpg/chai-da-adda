@@ -3,161 +3,149 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Volume2, VolumeX, RotateCcw } from "lucide-react";
-import { audioEngine } from "@/lib/audioEngine";
 
-const WELCOME_GREETING_TEXT =
-  "Welcome to Chai Da Adda! Experience the warmth of authentic Indian kulhad chai, hand-poured with roasted spices, ginger, and love. Scroll down to discover our signature blends and stories.";
-
-const SESSION_STORAGE_KEY = "chai_greeted_home";
+const AUDIO_SRC = "/audio/welcome-voice.mp3";
 
 export function VoiceGreeting() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [voiceLabel, setVoiceLabel] = useState<string>("Chai Da Adda Voice");
-  const audioFallbackRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const hasAttemptedAutoplayRef = useRef(false);
   const shouldReduceMotion = useReducedMotion();
-  const hasTriggeredRef = useRef(false);
 
-  // Stop all speech & audio playback
-  const stopAll = useCallback(() => {
-    audioEngine.stop();
-    if (audioFallbackRef.current) {
-      audioFallbackRef.current.pause();
-      audioFallbackRef.current.currentTime = 0;
+  // Play audio safely handling browser autoplay locks
+  const playAudio = useCallback(() => {
+    if (!audioRef.current) {
+      const audio = new Audio(AUDIO_SRC);
+      audio.preload = "auto";
+      audioRef.current = audio;
+    }
+
+    const audio = audioRef.current;
+    audio.currentTime = 0;
+
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setIsPlaying(true);
+          setHasPlayed(true);
+        })
+        .catch(() => {
+          // Autoplay was blocked by browser; will unlock on first user gesture
+          setIsPlaying(false);
+        });
+    }
+  }, []);
+
+  // Stop/Pause audio
+  const stopAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
     setIsPlaying(false);
   }, []);
 
-  // Speak welcome message using TTS engine with audio file fallback
-  const triggerWelcomeVoice = useCallback((isManual = false) => {
-    if (isPlaying) {
-      stopAll();
-      return;
-    }
-
-    // If auto-triggering, check if already spoken this session
-    if (!isManual && audioEngine.hasSpokenThisSession(SESSION_STORAGE_KEY)) {
-      return;
-    }
-
-    // Mark as played for session
-    audioEngine.markSpokenThisSession(SESSION_STORAGE_KEY);
-    hasTriggeredRef.current = true;
-    setHasPlayed(true);
-
-    // Initialize TTS voices
-    audioEngine.initVoices().then((voices) => {
-      const best = audioEngine.getBestVoice("en-IN");
-      if (best) {
-        setVoiceLabel(best.name.replace(/Google|Microsoft|Apple|Natural/gi, "").trim() || "Natural Voice");
+  // Toggle playback
+  const handleTogglePlay = useCallback(
+    (e?: React.MouseEvent) => {
+      if (e) {
+        e.stopPropagation();
       }
-    });
-
-    const spoken = audioEngine.speak({
-      text: WELCOME_GREETING_TEXT,
-      rate: 0.94,
-      pitch: 1.02,
-      lang: "en-IN",
-      onStart: () => {
-        setIsPlaying(true);
-      },
-      onEnd: () => {
-        setIsPlaying(false);
-      },
-      onError: () => {
-        // Fallback to recorded audio if TTS fails or is blocked
-        const audio = audioFallbackRef.current;
-        if (audio) {
-          audio.currentTime = 0;
-          audio
-            .play()
-            .then(() => setIsPlaying(true))
-            .catch(() => setIsPlaying(false));
-        } else {
-          setIsPlaying(false);
-        }
-      },
-    });
-
-    if (!spoken) {
-      // Direct fallback
-      const audio = audioFallbackRef.current;
-      if (audio) {
-        audio.currentTime = 0;
-        audio
-          .play()
-          .then(() => setIsPlaying(true))
-          .catch(() => setIsPlaying(false));
+      if (isPlaying) {
+        stopAudio();
+      } else {
+        playAudio();
       }
-    }
-  }, [isPlaying, stopAll]);
+    },
+    [isPlaying, stopAudio, playAudio]
+  );
 
   useEffect(() => {
     setMounted(true);
 
-    // Prepare backup audio
-    const audio = new Audio("/audio/welcome-voice.mp3");
+    // Instantiate HTML5 Audio
+    const audio = new Audio(AUDIO_SRC);
     audio.preload = "auto";
-    audioFallbackRef.current = audio;
+    audioRef.current = audio;
 
-    audio.onended = () => setIsPlaying(false);
-    audio.onpause = () => setIsPlaying(false);
-    audio.onerror = () => setIsPlaying(false);
-
-    // Check if previously greeted
-    const alreadyGreeted = audioEngine.hasSpokenThisSession(SESSION_STORAGE_KEY);
-    if (alreadyGreeted) {
+    const onPlay = () => setIsPlaying(true);
+    const onEnded = () => {
+      setIsPlaying(false);
       setHasPlayed(true);
+    };
+    const onPause = () => setIsPlaying(false);
+    const onError = () => setIsPlaying(false);
+
+    audio.addEventListener("play", onPlay);
+    audio.addEventListener("ended", onEnded);
+    audio.addEventListener("pause", onPause);
+    audio.addEventListener("error", onError);
+
+    // 1. Immediate 0ms attempt on page load
+    const initialPlayPromise = audio.play();
+    if (initialPlayPromise !== undefined) {
+      initialPlayPromise
+        .then(() => {
+          setIsPlaying(true);
+          setHasPlayed(true);
+          hasAttemptedAutoplayRef.current = true;
+        })
+        .catch(() => {
+          // Browser requires user interaction; setup universal listeners
+        });
     }
 
-    // Listen for user scroll or interaction on home page to auto-speak
-    const handleScrollOrInteract = () => {
-      if (hasTriggeredRef.current) return;
-      
-      // Check if user has started scrolling or gesturing
-      const scrollY = window.scrollY || document.documentElement.scrollTop;
-      if (scrollY > 10 || true) {
-        if (!audioEngine.hasSpokenThisSession(SESSION_STORAGE_KEY)) {
-          triggerWelcomeVoice(false);
-        }
-        removeScrollListeners();
-      }
+    // 2. Instant trigger on ANY user interaction (touch, scroll, click, tap, wheel)
+    const handleFirstUserGesture = () => {
+      if (hasAttemptedAutoplayRef.current) return;
+      hasAttemptedAutoplayRef.current = true;
+
+      audio.currentTime = 0;
+      audio
+        .play()
+        .then(() => {
+          setIsPlaying(true);
+          setHasPlayed(true);
+        })
+        .catch(() => {});
+
+      removeInteractionListeners();
     };
 
-    const addScrollListeners = () => {
-      const options: AddEventListenerOptions = { capture: true, passive: true };
-      window.addEventListener("scroll", handleScrollOrInteract, options);
-      window.addEventListener("wheel", handleScrollOrInteract, options);
-      window.addEventListener("touchmove", handleScrollOrInteract, options);
-      document.addEventListener("pointerdown", handleScrollOrInteract, options);
+    const options: AddEventListenerOptions = { capture: true, passive: true };
+
+    const addInteractionListeners = () => {
+      document.addEventListener("pointerdown", handleFirstUserGesture, options);
+      document.addEventListener("touchstart", handleFirstUserGesture, options);
+      document.addEventListener("click", handleFirstUserGesture, options);
+      window.addEventListener("scroll", handleFirstUserGesture, options);
+      window.addEventListener("wheel", handleFirstUserGesture, options);
+      window.addEventListener("keydown", handleFirstUserGesture, options);
     };
 
-    const removeScrollListeners = () => {
-      window.removeEventListener("scroll", handleScrollOrInteract);
-      window.removeEventListener("wheel", handleScrollOrInteract);
-      window.removeEventListener("touchmove", handleScrollOrInteract);
-      document.removeEventListener("pointerdown", handleScrollOrInteract);
+    const removeInteractionListeners = () => {
+      document.removeEventListener("pointerdown", handleFirstUserGesture, options);
+      document.removeEventListener("touchstart", handleFirstUserGesture, options);
+      document.removeEventListener("click", handleFirstUserGesture, options);
+      window.removeEventListener("scroll", handleFirstUserGesture, options);
+      window.removeEventListener("wheel", handleFirstUserGesture, options);
+      window.removeEventListener("keydown", handleFirstUserGesture, options);
     };
 
-    if (!alreadyGreeted) {
-      addScrollListeners();
-    }
+    addInteractionListeners();
 
     return () => {
-      removeScrollListeners();
-      stopAll();
+      removeInteractionListeners();
+      audio.removeEventListener("play", onPlay);
+      audio.removeEventListener("ended", onEnded);
+      audio.removeEventListener("pause", onPause);
+      audio.removeEventListener("error", onError);
+      audio.pause();
     };
-  }, [triggerWelcomeVoice, stopAll]);
-
-  const handleTogglePlay = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isPlaying) {
-      stopAll();
-    } else {
-      triggerWelcomeVoice(true);
-    }
-  };
+  }, []);
 
   if (!mounted) return null;
 
@@ -196,7 +184,7 @@ export function VoiceGreeting() {
         <div onClick={handleTogglePlay} className="flex flex-col cursor-pointer pr-1">
           <div className="flex items-center gap-2">
             <span className="text-xs sm:text-[13px] font-serif font-bold text-[#FBF6EE] group-hover:text-[#DFAB5F] transition-colors leading-tight">
-              {isPlaying ? "“Welcome to Chai Da Adda!”" : "Chai Da Adda Voice"}
+              {isPlaying ? "“Hey, chai lovers!”" : "Chai Da Adda Voice"}
             </span>
 
             {/* Animated Equalizer Waveform while speaking */}
@@ -211,7 +199,7 @@ export function VoiceGreeting() {
           </div>
 
           <span className="text-[8.5px] sm:text-[9.5px] font-mono text-[#DFAB5F]/90 uppercase tracking-widest leading-tight mt-0.5">
-            {isPlaying ? "Speaking Live • Tap to Mute" : hasPlayed ? "Tap to Replay Voice" : "Scroll to Listen"}
+            {isPlaying ? "Playing Live • Tap to Mute" : hasPlayed ? "Tap to Replay Voice" : "Tap or Scroll to Play"}
           </span>
         </div>
       </motion.div>
