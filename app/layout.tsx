@@ -24,6 +24,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://chai-da-adda.vercel.app"),
   title: "CHAI DA ADDA | Good Tea • Better Vibes",
   description:
     "Authentic Indian chai, crafted with warmth, tradition and a modern soul. Fresh ginger, cardamom, single-estate Assam tea, and unglazed Varanasi terracotta kulhads.",
@@ -54,6 +55,40 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CafeOrCoffeeShop",
+  name: "Chai Da Adda",
+  image: "https://chai-da-adda.vercel.app/logo.png",
+  telephone: "+91-7300212948",
+  servesCuisine: "Indian Chai & Tea Specialities",
+  priceRange: "₹100 - ₹250",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Heritage Ghat Road, Assi Ghat Corridor",
+    addressLocality: "Varanasi",
+    addressRegion: "Uttar Pradesh",
+    postalCode: "221005",
+    addressCountry: "IN",
+  },
+  openingHoursSpecification: [
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+      ],
+      opens: "06:00",
+      closes: "02:00",
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -64,6 +99,12 @@ export default function RootLayout({
       lang="en"
       className={`${cinzel.variable} ${jakarta.variable}`}
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="min-h-screen bg-[#0D0806] text-[#FBF6EE] font-sans antialiased overflow-x-hidden selection:bg-[#C69247] selection:text-[#0D0806]">
         <SmoothScroll>{children}</SmoothScroll>
         <FloatingContact />

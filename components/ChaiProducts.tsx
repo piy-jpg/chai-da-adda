@@ -144,23 +144,44 @@ export function ChaiProducts() {
             >
               Every cup is slow-simmered in brass handis and poured fresh into unglazed earthen terracotta kulhads.
             </motion.p>
+
+            {/* Google Rating & Trust Badges */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-wrap items-center gap-2 pt-2.5"
+            >
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#1E130D] border border-[#DFAB5F]/40 text-[10px] font-mono text-[#DFAB5F] shadow-sm">
+                <span className="text-amber-400">★★★★★</span>
+                <span className="font-bold text-white">4.9</span>
+                <span className="text-[#D8CCC0]/70">(1,500+ Varanasi Reviews)</span>
+              </div>
+              <span className="text-[10px] font-mono text-[#DFAB5F]/80 px-2 py-0.5 rounded-full bg-[#140C08] border border-[#C69247]/20">
+                100% Single-Estate Assam
+              </span>
+              <span className="text-[10px] font-mono text-[#DFAB5F]/80 px-2 py-0.5 rounded-full bg-[#140C08] border border-[#C69247]/20">
+                Zero Artificial Flavors
+              </span>
+            </motion.div>
           </div>
 
           {/* Running Track Controls & Menu Link */}
           <div className="flex items-center gap-3 self-start sm:self-auto">
             <button
               onClick={() => setIsPaused(!isPaused)}
-              className="p-2 rounded-full border border-[#C69247]/30 bg-[#1E130D] text-[#DFAB5F] hover:bg-[#C69247]/20 transition-colors shadow-sm"
+              className="p-2 rounded-full border border-[#C69247]/30 bg-[#1E130D] text-[#DFAB5F] hover:bg-[#C69247]/20 transition-colors shadow-sm cursor-pointer"
               title={isPaused ? "Resume Running Track" : "Pause Running Track"}
             >
               {isPaused ? <Play className="w-3 h-3 fill-[#DFAB5F]" /> : <Pause className="w-3 h-3" />}
             </button>
 
             <a
-              href="#visit"
-              className="inline-flex items-center gap-1.5 text-xs uppercase font-semibold tracking-[0.16em] text-[#DFAB5F] hover:text-[#FBF6EE] transition-colors group"
+              href="#sommelier"
+              className="inline-flex items-center gap-1.5 text-xs uppercase font-semibold tracking-[0.16em] text-[#DFAB5F] hover:text-[#FBF6EE] transition-colors group cursor-pointer"
             >
-              <span>Taste At The Adda</span>
+              <span>Find Your Chai</span>
               <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
             </a>
           </div>

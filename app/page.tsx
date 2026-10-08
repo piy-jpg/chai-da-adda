@@ -4,6 +4,7 @@ import React from "react";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { ChaiProducts } from "@/components/ChaiProducts";
+import { ChaiMatcher } from "@/components/ChaiMatcher";
 import { Experience } from "@/components/Experience";
 import { WhyChai } from "@/components/WhyChai";
 import { CinematicSection } from "@/components/CinematicSection";
@@ -22,6 +23,9 @@ export default function Home() {
 
       {/* Section 2: Signature Chai (Masala, Adrak, Elaichi, Kesar) */}
       <ChaiProducts />
+
+      {/* Section 3: Interactive Flavor Sommelier Matcher */}
+      <ChaiMatcher />
 
       {/* Section 4: The Adda Experience */}
       <Experience />

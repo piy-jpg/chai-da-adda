@@ -33,6 +33,24 @@ export function Navbar() {
   );
   const shouldReduceMotion = useReducedMotion();
 
+  // Live IST Open Status (6:00 AM - 2:00 AM)
+  const [isOpenNow, setIsOpenNow] = useState(true);
+
+  useEffect(() => {
+    const checkOpenStatus = () => {
+      const now = new Date();
+      const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+      const istDate = new Date(utc + 3600000 * 5.5);
+      const hours = istDate.getHours();
+      // Open 6:00 AM to 2:00 AM daily
+      const open = hours >= 6 || hours < 2;
+      setIsOpenNow(open);
+    };
+    checkOpenStatus();
+    const interval = setInterval(checkOpenStatus, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   const navLinks = [
     { name: "HOME", href: isStandalonePage ? "/#home" : "#home", id: "home", isExternalPage: false },
     { name: "OUR STORY", href: "/our-story", id: "story", isExternalPage: true },
@@ -255,8 +273,19 @@ export function Navbar() {
               })}
             </div>
 
-            {/* Visit Adda Gold Pill CTA Button */}
-            <div className="hidden sm:flex items-center shrink-0 z-10">
+            {/* Right Group: Live Adda Status & Visit Adda Gold Pill CTA Button */}
+            <div className="hidden sm:flex items-center gap-2.5 shrink-0 z-10">
+              <div className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1E130D]/90 border border-[#C69247]/30 text-[10px] font-mono text-[#DFAB5F]">
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isOpenNow
+                      ? "bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"
+                      : "bg-amber-400"
+                  }`}
+                />
+                <span>{isOpenNow ? "Open Now • 6 AM–2 AM" : "Opens at 6 AM"}</span>
+              </div>
+
               <Link
                 href="/contact"
                 className="relative inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full bg-gradient-to-r from-[#DFAB5F] via-[#C69247] to-[#DFAB5F] text-[#0D0806] font-bold text-[11px] sm:text-xs uppercase tracking-[0.2em] transition-all duration-300 shadow-[0_4px_20px_rgba(198,146,71,0.3)] hover:shadow-[0_0_25px_rgba(223,171,95,0.55)] hover:scale-[1.04] active:scale-[0.96] group overflow-hidden cursor-pointer"
@@ -293,6 +322,23 @@ export function Navbar() {
             transition={{ duration: 0.35, ease: cinematicEase }}
             className="lg:hidden mt-2.5 mx-auto max-w-lg rounded-3xl bg-[#140C08]/96 border border-[#C69247]/40 backdrop-blur-2xl overflow-hidden shadow-[0_25px_50px_rgba(0,0,0,0.9),0_0_30px_rgba(198,146,71,0.15)] p-5 space-y-3.5 pointer-events-auto"
           >
+            {/* Live Status Header in Mobile Drawer */}
+            <div className="flex items-center justify-between pb-2 border-b border-[#C69247]/20">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isOpenNow
+                      ? "bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"
+                      : "bg-amber-400"
+                  }`}
+                />
+                <span className="text-[11px] font-mono text-[#DFAB5F]">
+                  {isOpenNow ? "Open Now • Fresh Dum Brewing" : "Opens at 6:00 AM Daily"}
+                </span>
+              </div>
+              <span className="text-[10px] font-mono text-[#D8CCC0]/60">Varanasi, UP</span>
+            </div>
+
             <div className="space-y-1 pb-1">
               {navLinks.map((link) => {
                 const isActive = activeSection === link.name;
