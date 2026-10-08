@@ -295,10 +295,10 @@ function Cinematic3DCanvas({ reduceMotion }: { reduceMotion: boolean | null }) {
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="absolute inset-0 pointer-events-none z-0 overflow-hidden"
+      className="absolute inset-0 pointer-events-auto z-0 overflow-hidden"
       aria-hidden="true"
     >
-      <canvas ref={canvasRef} className="w-full h-full block pointer-events-none" />
+      <canvas ref={canvasRef} className="w-full h-full block" />
     </div>
   );
 }

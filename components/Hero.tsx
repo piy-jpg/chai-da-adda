@@ -292,10 +292,10 @@ function Hero3DCanvas() {
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="absolute inset-0 pointer-events-none z-10 overflow-hidden"
+      className="absolute inset-0 pointer-events-auto z-15 overflow-hidden"
       aria-hidden="true"
     >
-      <canvas ref={canvasRef} className="w-full h-full block pointer-events-none" />
+      <canvas ref={canvasRef} className="w-full h-full block" />
     </div>
   );
 }
@@ -341,14 +341,14 @@ export function Hero() {
         video.playsInline = true;
         video.play().catch(() => {});
 
-        // 2. Drive multi-stage narrative & background scale via calibrated mobile ScrollTrigger
+        // 2. Drive multi-stage narrative & background scale via ScrollTrigger
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: container,
             start: "top top",
-            end: "+=1000",
+            end: "+=1500",
             pin: true,
-            scrub: 0.5,
+            scrub: 0.6,
             anticipatePin: 1,
             onUpdate: (self) => {
               setScrollProgress(self.progress);
@@ -359,7 +359,7 @@ export function Hero() {
         tl.to(
           video,
           {
-            scale: 1.06,
+            scale: 1.08,
             ease: "power1.inOut",
           },
           0
@@ -375,7 +375,7 @@ export function Hero() {
           scrollTrigger: {
             trigger: container,
             start: "top top",
-            end: "+=2600",
+            end: "+=2800",
             pin: true,
             scrub: 0.8,
             anticipatePin: 1,
@@ -438,11 +438,11 @@ export function Hero() {
       <div className="absolute inset-0 w-full h-full overflow-hidden">
         <video
           ref={videoRef}
-          autoPlay
           muted
           playsInline
-          loop
-          preload="metadata"
+          autoPlay={isMobile}
+          loop={isMobile}
+          preload="auto"
           className="w-full h-full object-cover transform-gpu pointer-events-none filter brightness-95"
         >
           <source src="/videos/chai-ka-adda.mp4" type="video/mp4" />
@@ -484,26 +484,9 @@ export function Hero() {
           </h1>
 
           {/* Description */}
-          <p className="text-xs sm:text-lg md:text-xl text-[#E0D4C8] font-sans font-light max-w-2xl mx-auto leading-relaxed mb-4 sm:mb-6">
+          <p className="text-xs sm:text-lg md:text-xl text-[#E0D4C8] font-sans font-light max-w-2xl mx-auto leading-relaxed mb-5 sm:mb-7">
             Authentic Indian chai, crafted with warmth, tradition and a modern soul.
           </p>
-
-          {/* Quick Action CTAs */}
-          <div className="flex items-center justify-center gap-2.5 sm:gap-3.5 w-full max-w-xs sm:max-w-none">
-            <a
-              href="/signature-chai"
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-[#DFAB5F] via-[#C69247] to-[#DFAB5F] text-[#0D0806] font-bold text-[11px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.18em] shadow-[0_4px_20px_rgba(198,146,71,0.35)] hover:scale-105 active:scale-95 transition-all"
-            >
-              <span>Explore Chai</span>
-              <ArrowUpRight className="w-3.5 h-3.5 text-[#0D0806]" />
-            </a>
-            <a
-              href="/our-story"
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full border border-[#C69247]/50 bg-[#140C08]/80 text-[#FBF6EE] font-medium text-[11px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.18em] backdrop-blur-md hover:border-[#DFAB5F] active:scale-95 transition-all"
-            >
-              <span>Our Story</span>
-            </a>
-          </div>
         </div>
 
         {/* ================= STAGE 2: 33% to 68% (The Slow Boiling Craft) ================= */}
